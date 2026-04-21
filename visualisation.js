@@ -2,8 +2,8 @@ import { supabase } from "./supabase.js";
 import { handleSupabaseError, clearAuditProgress } from "./utils.js";
 
 /* ===================== SESSION CHECK & SECURITY ===================== */
-const { data: sessionData } = await supabase.auth.getSession();
-if (!sessionData.session) window.location.href = "login.html?redirect=visualisation.html";
+//const { data: sessionData } = await supabase.auth.getSession();
+//if (!sessionData.session) window.location.href = "login.html?redirect=visualisation.html";
 
 document.getElementById("operatorName").textContent =
     "Bienvenue" ;

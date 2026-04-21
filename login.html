@@ -11,36 +11,70 @@
   <style>
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      /* margin: 0 */
-      padding: 15px;
+      padding: 20px;
+    }
+
+    .back-link {
+      position: absolute;
+      top: 24px;
+      left: 24px;
     }
 
     form {
-      background: var(--surface-color);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 40px;
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 44px;
       border-radius: var(--radius-lg);
-      border: 1px solid var(--surface-border);
-      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
       text-align: center;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
+    }
+
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
     }
 
     h2 {
       margin-bottom: 30px;
       color: var(--text-main);
+      font-size: 1.6rem;
+    }
+
+    .login-subtitle {
+      font-size: 0.92rem;
+      color: #64748b;
+      margin-top: -20px;
+      margin-bottom: 28px;
     }
 
     button[type="submit"] {
       width: 100%;
       margin-top: 25px;
-      padding: 14px;
-      font-size: 1.1rem;
+      padding: 15px;
+      font-size: 1.05rem;
+    }
+
+    @media (max-width: 480px) {
+      form { padding: 32px 22px; }
+      .back-link { top: 16px; left: 16px; }
     }
   </style>
 </head>
@@ -48,8 +82,18 @@
 
 <body>
 
+  <!-- Back to landing -->
+  <a href="landing.html" class="back-link" id="back-landing">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Retour
+  </a>
+
   <form id="loginForm">
+    <div class="login-icon" aria-hidden="true">🔐</div>
     <h2>Connexion Audit</h2>
+    <p class="login-subtitle">Accès réservé aux auditeurs autorisés</p>
 
     <input type="email" id="email" placeholder="Email" autocomplete="email" required>
     <div class="password-wrapper">
@@ -121,7 +165,9 @@
         return;
       }
 
-      window.location.href = "accueil.html";
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+      window.location.href = redirect || "accueil.html";
     });
   </script>
 

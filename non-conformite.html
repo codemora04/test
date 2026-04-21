@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signalement Non-conformité</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="logo4.png">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Formulaire de signalement d'une non-conformité qualité">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #fefce8 0%, #fff7ed 50%, #fef2f2 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,158,11,0.2), rgba(239,68,68,0.1));
+      filter: blur(80px);
+      top: -200px; right: -200px;
+      z-index: 0;
+    }
+
+    /* ---- Back button ---- */
+    .back-btn {
+      position: relative;
+      z-index: 1;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,0.3);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      margin-bottom: 32px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .back-btn:hover {
+      background: rgba(255,255,255,0.95);
+      border-color: #f59e0b;
+      color: #b45309;
+      transform: translateX(-3px);
+    }
+
+    /* ---- Form card ---- */
+    .nc-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 28px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    }
+
+    .nc-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .nc-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fef3c7, #fcd34d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(245,158,11,0.3);
+    }
+
+    .nc-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .nc-subtitle {
+      font-size: 0.92rem;
+      color: #64748b;
+    }
+
+    /* ---- Form fields ---- */
+    .field-group {
+      margin-bottom: 22px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .field-required {
+      color: #f59e0b;
+      margin-left: 3px;
+    }
+
+    .nc-input,
+    .nc-textarea,
+    .nc-select {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      background: #fafafa;
+      color: #1e293b;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.97rem;
+      outline: none;
+      transition: all 0.25s ease;
+      max-width: 100%;
+      margin: 0;
+      display: block;
+    }
+
+    .nc-textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .nc-input:focus,
+    .nc-textarea:focus,
+    .nc-select:focus {
+      border-color: #f59e0b;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+
+    .nc-input::placeholder,
+    .nc-textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    /* Date input special */
+    input[type="date"].nc-input {
+      cursor: pointer;
+    }
+
+    /* ---- Submit btn ---- */
+    .nc-submit {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      letter-spacing: 0.01em;
+      box-shadow: 0 6px 20px rgba(245,158,11,0.35);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .nc-submit:hover:not(:disabled) {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      box-shadow: 0 10px 30px rgba(245,158,11,0.45);
+      transform: translateY(-2px);
+    }
+
+    .nc-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ---- Success message ---- */
+    .nc-success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      padding: 20px 0;
+    }
+
+    .nc-success.show { display: flex; }
+    .nc-form.hidden  { display: none; }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+      animation: pop 0.5s cubic-bezier(0.2, 0.8, 0.4, 1.4);
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .success-text {
+      font-size: 0.93rem;
+      color: #64748b;
+    }
+
+    .btn-new {
+      margin-top: 8px;
+      padding: 12px 28px;
+      border-radius: 12px;
+      border: 1.5px solid #10b981;
+      background: transparent;
+      color: #10b981;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .btn-new:hover {
+      background: #10b981;
+      color: white;
+      transform: none;
+    }
+
+    /* ---- Error msg ---- */
+    .nc-error {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      font-weight: 500;
+      display: none;
+    }
+    .nc-error.show { display: block; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 620px) {
+      .nc-card {
+        padding: 32px 22px;
+        border-radius: 20px;
+      }
+      .nc-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<script src="./pwa.js"></script>
+
+<body>
+
+  <!-- Back -->
+  <a href="landing.html" class="back-btn" id="back-landing" aria-label="Retour à l'accueil">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Retour
+  </a>
+
+  <!-- Card -->
+  <div class="nc-card">
+
+    <!-- Header -->
+    <div class="nc-header">
+      <div class="nc-icon" aria-hidden="true">⚠️</div>
+      <h1 class="nc-title">Non-conformité</h1>
+      <p class="nc-subtitle">Remplissez le formulaire pour enregistrer un signalement</p>
+    </div>
+
+    <!-- Form -->
+    <form class="nc-form" id="ncForm" novalidate>
+
+      <!-- Description non-conformité -->
+      <div class="field-group">
+        <label class="field-label" for="nc-description">
+          Description de la non-conformité <span class="field-required">*</span>
+        </label>
+        <textarea
+          id="nc-description"
+          class="nc-textarea"
+          name="description"
+          placeholder="Décrivez la non-conformité observée…"
+          required
+          maxlength="1000"
+        ></textarea>
+        <div class="nc-error" id="err-description">Ce champ est obligatoire.</div>
+      </div>
+
+      <!-- Responsable -->
+      <div class="field-group">
+        <label class="field-label" for="nc-responsable">
+          Responsable <span class="field-required">*</span>
+        </label>
+        <input
+          type="text"
+          id="nc-responsable"
+          class="nc-input"
+          name="responsable"
+          placeholder="Nom du responsable"
+          required
+          maxlength="100"
+        >
+        <div class="nc-error" id="err-responsable">Ce champ est obligatoire.</div>
+      </div>
+
+      <!-- Délai -->
+      <div class="field-group">
+        <label class="field-label" for="nc-delai">
+          Délai de correction <span class="field-required">*</span>
+        </label>
+        <input
+          type="date"
+          id="nc-delai"
+          class="nc-input"
+          name="delai"
+          required
+        >
+        <div class="nc-error" id="err-delai">Veuillez sélectionner une date.</div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="nc-submit" id="nc-submit-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Enregistrer le signalement
+      </button>
+
+    </form>
+
+    <!-- Success -->
+    <div class="nc-success" id="ncSuccess" role="alert" aria-live="polite">
+      <div class="success-icon" aria-hidden="true">✅</div>
+      <div class="success-title">Signalement enregistré !</div>
+      <div class="success-text" id="nc-success-text">
+        La non-conformité a bien été soumise.
+      </div>
+      <button class="btn-new" id="btn-new-nc" type="button">
+        Ajouter un autre signalement
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const form      = document.getElementById('ncForm');
+    const successEl = document.getElementById('ncSuccess');
+    const successTxt= document.getElementById('nc-success-text');
+    const btnNew    = document.getElementById('btn-new-nc');
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('nc-delai').setAttribute('min', today);
+
+    // Field validation helper
+    function validateField(id, errId) {
+      const val = document.getElementById(id).value.trim();
+      const err = document.getElementById(errId);
+      if (!val) {
+        err.classList.add('show');
+        return false;
+      }
+      err.classList.remove('show');
+      return true;
+    }
+
+    // Clear errors on input
+    ['nc-description','nc-responsable','nc-delai'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const errId = 'err-' + id.replace('nc-','');
+        document.getElementById(errId).classList.remove('show');
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const ok1 = validateField('nc-description', 'err-description');
+      const ok2 = validateField('nc-responsable',  'err-responsable');
+      const ok3 = validateField('nc-delai',         'err-delai');
+
+      if (!ok1 || !ok2 || !ok3) return;
+
+      const description = document.getElementById('nc-description').value.trim();
+      const responsable  = document.getElementById('nc-responsable').value.trim();
+      const delai        = document.getElementById('nc-delai').value;
+
+      // Format date nicely
+      const dateFr = new Date(delai).toLocaleDateString('fr-FR', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      // Save to localStorage
+      const entry = {
+        id: Date.now(),
+        description,
+        responsable,
+        delai,
+        createdAt: new Date().toISOString()
+      };
+      const existing = JSON.parse(localStorage.getItem('non_conformites') || '[]');
+      existing.push(entry);
+      localStorage.setItem('non_conformites', JSON.stringify(existing));
+
+      // Show success
+      successTxt.textContent =
+        `Responsable : ${responsable} — Délai : ${dateFr}`;
+
+      form.classList.add('hidden');
+      successEl.classList.add('show');
+    });
+
+    btnNew.addEventListener('click', () => {
+      form.reset();
+      form.classList.remove('hidden');
+      successEl.classList.remove('show');
+    });
+  </script>
+
+</body>
+</html>

@@ -276,6 +276,93 @@
     }
     .nc-error.show { display: block; }
 
+    /* ---- Image upload ---- */
+    .upload-zone {
+      border: 2px dashed #e2e8f0;
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: #fafafa;
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .upload-text {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .upload-text strong {
+      color: #f59e0b;
+    }
+
+    .upload-hint {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .image-preview-wrap {
+      display: none;
+      position: relative;
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .image-preview-wrap.show { display: block; }
+
+    .image-preview-wrap img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      background: #f8fafc;
+      display: block;
+    }
+
+    .btn-remove-img {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(239,68,68,0.9);
+      color: white;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.2s;
+    }
+
+    .btn-remove-img:hover { background: #dc2626; }
+
     /* ---- Responsive ---- */
     @media (max-width: 620px) {
       .nc-card {
@@ -359,6 +446,24 @@
         <div class="nc-error" id="err-delai">Veuillez sélectionner une date.</div>
       </div>
 
+      <!-- Photo -->
+      <div class="field-group">
+        <label class="field-label">Photo (optionnel)</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="nc-image" name="image" accept="image/*">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">
+            <strong>Cliquez</strong> ou glissez une image ici
+          </div>
+          <div class="upload-hint">JPG, PNG, WEBP — max 5 Mo</div>
+        </div>
+        <div class="image-preview-wrap" id="previewWrap">
+          <img id="imagePreview" src="" alt="Aperçu de la photo">
+          <button type="button" class="btn-remove-img" id="btnRemoveImg" aria-label="Supprimer l'image">✕</button>
+        </div>
+        <div class="nc-error" id="err-image"></div>
+      </div>
+
       <!-- Submit -->
       <button type="submit" class="nc-submit" id="nc-submit-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -383,11 +488,22 @@
 
   </div>
 
-  <script>
-    const form      = document.getElementById('ncForm');
-    const successEl = document.getElementById('ncSuccess');
-    const successTxt= document.getElementById('nc-success-text');
-    const btnNew    = document.getElementById('btn-new-nc');
+  <script type="module">
+    import { supabase } from './supabase.js';
+
+    const form        = document.getElementById('ncForm');
+    const successEl   = document.getElementById('ncSuccess');
+    const successTxt  = document.getElementById('nc-success-text');
+    const btnNew      = document.getElementById('btn-new-nc');
+    const submitBtn   = document.getElementById('nc-submit-btn');
+    const uploadZone  = document.getElementById('uploadZone');
+    const fileInput   = document.getElementById('nc-image');
+    const previewWrap = document.getElementById('previewWrap');
+    const imgPreview  = document.getElementById('imagePreview');
+    const btnRemove   = document.getElementById('btnRemoveImg');
+    const errImage    = document.getElementById('err-image');
+
+    let imageFile = null;
 
     // Set min date to today
     const today = new Date().toISOString().split('T')[0];
@@ -397,10 +513,7 @@
     function validateField(id, errId) {
       const val = document.getElementById(id).value.trim();
       const err = document.getElementById(errId);
-      if (!val) {
-        err.classList.add('show');
-        return false;
-      }
+      if (!val) { err.classList.add('show'); return false; }
       err.classList.remove('show');
       return true;
     }
@@ -408,50 +521,125 @@
     // Clear errors on input
     ['nc-description','nc-responsable','nc-delai'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
-        const errId = 'err-' + id.replace('nc-','');
-        document.getElementById(errId).classList.remove('show');
+        document.getElementById('err-' + id.replace('nc-','')).classList.remove('show');
       });
     });
 
-    form.addEventListener('submit', (e) => {
+    // Image handling
+    function loadImage(file) {
+      errImage.classList.remove('show');
+      if (!file.type.startsWith('image/')) {
+        errImage.textContent = 'Le fichier doit être une image.';
+        errImage.classList.add('show');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        errImage.textContent = "L'image ne doit pas dépasser 5 Mo.";
+        errImage.classList.add('show');
+        return;
+      }
+      imageFile = file;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imgPreview.src = ev.target.result;
+        previewWrap.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) loadImage(fileInput.files[0]);
+    });
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) { fileInput.files = e.dataTransfer.files; loadImage(file); }
+    });
+
+    btnRemove.addEventListener('click', () => {
+      imageFile = null;
+      fileInput.value = '';
+      imgPreview.src = '';
+      previewWrap.classList.remove('show');
+      errImage.classList.remove('show');
+    });
+
+    function resetSubmitBtn() {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer le signalement`;
+    }
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const ok1 = validateField('nc-description', 'err-description');
       const ok2 = validateField('nc-responsable',  'err-responsable');
       const ok3 = validateField('nc-delai',         'err-delai');
-
       if (!ok1 || !ok2 || !ok3) return;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '⏳ Enregistrement…';
 
       const description = document.getElementById('nc-description').value.trim();
       const responsable  = document.getElementById('nc-responsable').value.trim();
       const delai        = document.getElementById('nc-delai').value;
 
-      // Format date nicely
-      const dateFr = new Date(delai).toLocaleDateString('fr-FR', {
-        year: 'numeric', month: 'long', day: 'numeric'
-      });
+      // Upload image to Supabase Storage if provided
+      let imageUrl = null;
+      if (imageFile) {
+        const ext  = imageFile.name.split('.').pop();
+        const path = `${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('nc-images')
+          .upload(path, imageFile, { contentType: imageFile.type });
+        if (uploadError) {
+          errImage.textContent = "Erreur lors de l'upload de l'image.";
+          errImage.classList.add('show');
+          resetSubmitBtn();
+          return;
+        }
+        const { data: urlData } = supabase.storage.from('nc-images').getPublicUrl(path);
+        imageUrl = urlData.publicUrl;
+      }
 
-      // Save to localStorage
-      const entry = {
-        id: Date.now(),
+      // Insert into Supabase
+      const { error } = await supabase.from('non_conformites').insert({
         description,
         responsable,
         delai,
-        createdAt: new Date().toISOString()
-      };
-      const existing = JSON.parse(localStorage.getItem('non_conformites') || '[]');
-      existing.push(entry);
-      localStorage.setItem('non_conformites', JSON.stringify(existing));
+        image_url: imageUrl,
+        auditeur: localStorage.getItem('username') || null
+      });
 
-      // Show success
-      successTxt.textContent =
-        `Responsable : ${responsable} — Délai : ${dateFr}`;
+      if (error) {
+        errImage.textContent = "Erreur lors de l'enregistrement. Réessayez.";
+        errImage.classList.add('show');
+        resetSubmitBtn();
+        return;
+      }
 
+      const dateFr = new Date(delai).toLocaleDateString('fr-FR', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+      successTxt.textContent = `Responsable : ${responsable} — Délai : ${dateFr}`;
       form.classList.add('hidden');
       successEl.classList.add('show');
+      resetSubmitBtn();
     });
 
     btnNew.addEventListener('click', () => {
+      imageFile = null;
+      fileInput.value = '';
+      imgPreview.src = '';
+      previewWrap.classList.remove('show');
+      errImage.classList.remove('show');
       form.reset();
       form.classList.remove('hidden');
       successEl.classList.remove('show');

@@ -14,8 +14,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
       padding: 20px;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     }
 
     .back-link {

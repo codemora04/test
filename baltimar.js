@@ -1,6 +1,14 @@
 import { supabase } from "./supabase.js";
 import { getCurrentAuditPeriod, getAuditPeriodStartDate, compressImage, showLoading, hideLoading, handleSupabaseError } from "./utils.js";
 
+function parseImageUrls(val) {
+  if (!val) return [];
+  if (typeof val === "string" && val.startsWith("[")) {
+    try { return JSON.parse(val); } catch {}
+  }
+  return typeof val === "string" ? [val] : [];
+}
+
 /*Eviter que l'utilisateur quitte la page accidentellement.*/
 window.addEventListener("beforeunload", (e) => {
   if (currentSessionId) {
@@ -206,7 +214,7 @@ function isRowComplete(tr) {
 
   const status = statusEl?.value || "";
   const comment = commentEl?.value?.trim() || "";
-  const hasFile = fileEl?.files && fileEl.files.length > 0;
+  const hasFile = (fileEl?.files && fileEl.files.length > 0) || tr.dataset.hasImages === "1";
 
   if (status === "") return false;
   if (comment === "") return false;
@@ -506,9 +514,6 @@ async function getOrCreateAuditSession(audit, zone, souszone) {
   if (zone) query = query.eq("zone", zone);
   else query = query.is("zone", null);
 
-  if (souszone) query = query.eq("souszone", souszone);
-  else query = query.is("souszone", null);
-
   const { data: existing, error: errFetch } = await query.limit(1);
   if (errFetch) throw errFetch;
 
@@ -523,7 +528,6 @@ async function getOrCreateAuditSession(audit, zone, souszone) {
       user_id: userId,
       audit: audit,
       zone: zone || null,
-      souszone: souszone || null,
       created_at: new Date().toISOString(),
     })
     .select("id")
@@ -565,7 +569,7 @@ async function uploadImageToStorage(file) {
   return data.publicUrl || "";
 }
 
-async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, file }) {
+async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, files, existingUrls }) {
   if (!currentSessionId) return;
 
   const { data: sessionData } = await supabase
@@ -574,25 +578,29 @@ async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, file 
     .eq("id", currentSessionId)
     .single();
 
-  let image_url = null;
+  const urls = [...(existingUrls || [])];
   try {
-    if (file) {
-      const compressedFile = await compressImage(file);
-      const url = await uploadImageToStorage(compressedFile);
-      image_url = url || null;
+    for (const f of (files || [])) {
+      const compressed = await compressImage(f);
+      const url = await uploadImageToStorage(compressed);
+      if (url) urls.push(url);
     }
   } catch (e) {
     handleSupabaseError(e, "Erreur upload image");
     return;
   }
 
+  const image_url = urls.length === 0 ? null
+    : urls.length === 1 ? urls[0]
+    : JSON.stringify(urls);
+
   const { error } = await supabase
     .from("audit_answers")
     .upsert(
       {
         session_id: currentSessionId,
-        user_id: sessionData?.user_id,   
-        zone: sessionData?.zone,         
+        user_id: sessionData?.user_id,
+        zone: sessionData?.zone,
         rubrique: rubriqueTitle,
         question: question,
         status: statusLabel,
@@ -796,7 +804,7 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
           <input type="text" name="comment_0_${qIndex}" placeholder="Commentaire..." />
         </td>
 
-        ${isMobile ? `<td><input type="file" name="image_0_${qIndex}" accept="image/png, image/jpeg, image/jpg" /></td>` : ''}
+        ${isMobile ? `<td><input type="file" name="image_0_${qIndex}" accept="image/png, image/jpeg, image/jpg" multiple /></td>` : ''}
       `;
 
       tbody.appendChild(tr);
@@ -814,21 +822,26 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         const cmt = tr.querySelector('input[type="text"]');
         cmt.value = ex.comment || "";
         if (ex.image_url && isMobile) {
-          fileEl?.insertAdjacentHTML("beforebegin", `<a href="${ex.image_url}" target="_blank" title="Voir l'image actuelle" style="margin-right:10px; font-size:1.4rem; text-decoration:none;">🖼️</a>`);
+          tr.dataset.hasImages = "1";
+          const urls = parseImageUrls(ex.image_url);
+          const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
+          fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
         }
       }
 
       async function onRowChange() {
         const statusLabel = statusEl?.selectedOptions?.[0]?.textContent?.trim() || "";
         const comment = commentEl?.value?.trim() || "";
-        const file = fileEl?.files?.[0] || null;
+        const files = Array.from(fileEl?.files || []);
+        const existingUrls = parseImageUrls(ex?.image_url);
 
         await saveAnswer({
           rubriqueTitle,
           question: questionText,
           statusLabel,
           comment,
-          file,
+          files,
+          existingUrls,
         });
 
         updateRowColor(tr);
@@ -896,7 +909,7 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
             <input type="text" name="comment_${index}_${qIndex}" placeholder="Commentaire..." />
           </td>
 
-          ${isMobile ? `<td><input type="file" name="image_${index}_${qIndex}" accept="image/png, image/jpeg, image/jpg" /></td>` : ''}
+          ${isMobile ? `<td><input type="file" name="image_${index}_${qIndex}" accept="image/png, image/jpeg, image/jpg" multiple /></td>` : ''}
         `;
 
         tbody.appendChild(tr);
@@ -914,21 +927,26 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
           const cmt = tr.querySelector('input[type="text"]');
           cmt.value = ex.comment || "";
           if (ex.image_url && isMobile) {
-            fileEl?.insertAdjacentHTML("beforebegin", `<a href="${ex.image_url}" target="_blank" title="Voir l'image actuelle" style="margin-right:10px; font-size:1.4rem; text-decoration:none;">🖼️</a>`);
+            tr.dataset.hasImages = "1";
+            const urls = parseImageUrls(ex.image_url);
+            const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
+            fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
           }
         }
 
         async function onRowChange() {
           const statusLabel = statusEl?.selectedOptions?.[0]?.textContent?.trim() || "";
           const comment = commentEl?.value?.trim() || "";
-          const file = fileEl?.files?.[0] || null;
+          const files = Array.from(fileEl?.files || []);
+          const existingUrls = parseImageUrls(ex?.image_url);
 
           await saveAnswer({
             rubriqueTitle,
             question: questionText,
             statusLabel,
             comment,
-            file,
+            files,
+            existingUrls,
           });
 
           updateRowColor(tr);
@@ -1109,7 +1127,7 @@ downloadBtn?.addEventListener("click", async () => {
         const periodStartDate = getAuditPeriodStartDate(audit);
         const { data: sessions, error: sessErr } = await supabase
           .from("audit_sessions")
-          .select("id, zone, souszone")
+          .select("id, zone")
           .eq("audit", audit)
           .eq("user_id", userId)
           .gte("created_at", periodStartDate);
@@ -1136,16 +1154,21 @@ downloadBtn?.addEventListener("click", async () => {
               answerMap[key] = a;
 
               if (a.image_url && !a.image_url.includes("undefined")) {
-                imagePromises.push(
-                  fetch(a.image_url)
-                    .then(res => res.blob())
-                    .then(blob => {
-                      const file = new File([blob], "image.jpg", { type: blob.type });
-                      return readImageCompressed(file, 400, 0.7);
-                    })
-                    .then(imgData => { preloadedImages[a.id] = imgData; })
-                    .catch(() => { /* mute error */ })
-                );
+                parseImageUrls(a.image_url).forEach(url => {
+                  imagePromises.push(
+                    fetch(url)
+                      .then(res => res.blob())
+                      .then(blob => {
+                        const file = new File([blob], "image.jpg", { type: blob.type });
+                        return readImageCompressed(file, 400, 0.7);
+                      })
+                      .then(imgData => {
+                        if (!preloadedImages[a.id]) preloadedImages[a.id] = [];
+                        preloadedImages[a.id].push(imgData);
+                      })
+                      .catch(() => {})
+                  );
+                });
               }
             });
           }
@@ -1371,7 +1394,7 @@ downloadBtn?.addEventListener("click", async () => {
               
               rAnswers.forEach((ans, rIdx) => {
                 rows.push([ans.question, ans.status || "", ans.comment || "", ""]);
-                if (ans.image_url && preloadedImages[ans.id]) {
+                if (preloadedImages[ans.id]?.length) {
                   imagesMap.set(rIdx, preloadedImages[ans.id]);
                 }
               });
@@ -1402,11 +1425,12 @@ downloadBtn?.addEventListener("click", async () => {
                 },
                 didDrawCell: (data) => {
                   if (data.section === "body" && data.column.index === 3) {
-                    const imgData = imagesMap.get(data.row.index);
-                    if (imgData) {
-                      const x = data.cell.x + 2; const yImg = data.cell.y + 2;
-                      const w = data.cell.width - 4; const h = data.cell.height - 4;
-                      doc.addImage(imgData, "JPEG", x, yImg, w, h);
+                    const imgs = imagesMap.get(data.row.index);
+                    if (imgs?.length) {
+                      const imgW = (data.cell.width - 4) / imgs.length;
+                      imgs.forEach((imgData, i) => {
+                        doc.addImage(imgData, "JPEG", data.cell.x + 2 + i * imgW, data.cell.y + 2, imgW - 1, data.cell.height - 4);
+                      });
                     }
                   }
                 },

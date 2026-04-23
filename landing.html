@@ -102,8 +102,8 @@
     .cards-grid {
       position: relative;
       z-index: 1;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 24px;
       width: 100%;
       max-width: 960px;
@@ -245,35 +245,6 @@
       text-align: center;
     }
 
-    /* ---- Dark Mode ---- */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: linear-gradient(135deg, #0f172a 0%, #0d1525 50%, #18120a 100%);
-      }
-
-      .landing-title {
-        background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .landing-subtitle { color: #94a3b8; }
-
-      .action-card {
-        background: rgba(30, 41, 59, 0.92);
-        border-color: rgba(51, 65, 85, 0.8);
-      }
-
-      .action-card.audit:hover { border-color: #10b981; }
-      .action-card.visu:hover  { border-color: #6366f1; }
-      .action-card.nc:hover    { border-color: #f59e0b; }
-
-      .card-title { color: #e2e8f0; }
-      .card-desc  { color: #94a3b8; }
-
-      .landing-footer { color: #475569; }
-    }
 
     /* ---- Responsive ---- */
     @media (max-width: 860px) {
@@ -341,12 +312,12 @@
       </a>
 
       <!-- Visualisations -->
-      <a href="visualisation.html" class="action-card visu" id="card-visu" aria-label="Voir les visualisations">
-        <span class="card-badge">Graphiques</span>
+      <a href="login.html?redirect=visualisation.html" class="action-card visu" id="card-visu" aria-label="Voir les visualisations">
+        <span class="card-badge">Sécurisé</span>
         <div class="card-icon-wrap" aria-hidden="true">📊</div>
         <div class="card-body">
           <div class="card-title">Visualisations</div>
-          <div class="card-desc">Consultez les tableaux de bord et graphiques de performance.</div>
+          <div class="card-desc">Consultez les tableaux de bord et graphiques de performance. Connexion requise.</div>
         </div>
         <div class="card-arrow" aria-hidden="true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

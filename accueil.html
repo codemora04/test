@@ -43,11 +43,11 @@
         <img src="logo2.png" width="150" alt="Revey">
       </button>
     </div>
-    <div id="extraButtons" style="display:none; margin-top: 20px; text-align: center;">
-      <button id="statsBtn" class="btn-retour" style="background-color: #0b763b; width: 100%; max-width: 320px;">
+    <div id="extraButtons" style="display:none; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px;">
+      <button id="statsBtn" class="btn-retour" style="background-color: #0b763b; width: 100%; max-width: 350px;">
         📊 Visualiser des Graphiques
       </button>
-      <button id="rapportBtn" class="btn-retour" style="background-color: #0b763b; width: 100%; max-width: 350px; margin-top: 30px;">
+      <button id="rapportBtn" class="btn-retour" style="background-color: #0b763b; width: 100%; max-width: 350px;">
         📄 Télécharger rapport Non-conformités
       </button>
     </div>
@@ -97,13 +97,21 @@
       reveyBtn.disabled = true;
       identificationForm.style.display = "block";
     }
+    function enableResponsable(username) {
+      logosSection.style.display = "none";
+      extraButtons.style.display = "flex";
+      baltimarBtn.disabled = true;
+      reveyBtn.disabled = true;
+      identificationForm.style.display = "none";
+      setSuccess("Bienvenue " + username + " !");
+    }
 
     // Verification de sessions existante
     const savedUsername = sessionStorage.getItem("audit_username");
     const savedRole = sessionStorage.getItem("audit_user_role");
     if (savedUsername) {
       if (savedRole === "responsable") {
-        window.location.href = "visualisation.html";
+        enableResponsable(savedUsername);
       } else if (savedRole === "auditeur") {
         usernameInput.value = savedUsername;
         enableLogos();
@@ -161,7 +169,7 @@
       sessionStorage.setItem("audit_user_role", data.role || "auditeur");
 
       if (data.role === "responsable") {
-        window.location.href = "visualisation.html";
+        enableResponsable(username);
       } else if (data.role === "auditeur") {
         enableLogos();
         setSuccess("Bienvenue " + username + "!");

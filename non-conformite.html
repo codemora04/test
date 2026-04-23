@@ -372,69 +372,6 @@
       .nc-title { font-size: 1.5rem; }
     }
 
-    /* ---- Dark Mode ---- */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: linear-gradient(135deg, #1a120a 0%, #18110e 50%, #180a0a 100%);
-      }
-
-      .back-btn {
-        background: rgba(30, 41, 59, 0.8);
-        border-color: #334155;
-        color: #94a3b8;
-      }
-
-      .back-btn:hover {
-        background: rgba(30, 41, 59, 0.95);
-        border-color: #f59e0b;
-        color: #fbbf24;
-      }
-
-      .nc-card {
-        background: rgba(30, 41, 59, 0.95);
-        border-color: rgba(51, 65, 85, 0.8);
-      }
-
-      .nc-title    { color: #e2e8f0; }
-      .nc-subtitle { color: #94a3b8; }
-
-      .field-label { color: #94a3b8; }
-
-      .nc-input,
-      .nc-textarea,
-      .nc-select {
-        background: #1e293b;
-        border-color: #334155;
-        color: #e2e8f0;
-      }
-
-      .nc-input:focus,
-      .nc-textarea:focus,
-      .nc-select:focus {
-        background: #253347;
-        border-color: #f59e0b;
-      }
-
-      .nc-input::placeholder,
-      .nc-textarea::placeholder { color: #64748b; }
-
-      .upload-zone {
-        background: #1e293b;
-        border-color: #475569;
-      }
-
-      .upload-zone:hover,
-      .upload-zone.drag-over {
-        background: #1a1e10;
-        border-color: #f59e0b;
-      }
-
-      .upload-text  { color: #94a3b8; }
-      .upload-hint  { color: #64748b; }
-
-      .success-title { color: #e2e8f0; }
-      .success-text  { color: #94a3b8; }
-    }
   </style>
 </head>
 <script src="./pwa.js"></script>
@@ -477,6 +414,22 @@
         ></textarea>
         <div class="nc-error" id="err-description">Ce champ est obligatoire.</div>
       </div>
+      <!--Actions-->
+      <div class="field-group">
+        <label class="field-label" for="nc-action">
+          Action <span class="field-required">*</span>
+        </label>
+        <input
+        type="text"
+        id="nc-action"
+        class="nc-input"
+        name="action"
+        placeholder="Décrire l'action"
+        required
+        maxlength="100"
+        >
+        <div class="nc-error" id="err-action">Ce champ est obligatoire.</div>
+      </div>
 
       <!-- Responsable -->
       <div class="field-group">
@@ -498,7 +451,7 @@
       <!-- Délai -->
       <div class="field-group">
         <label class="field-label" for="nc-delai">
-          Délai de correction <span class="field-required">*</span>
+          réalisation de l'action <span class="field-required">*</span>
         </label>
         <input
           type="date"

@@ -1,6 +1,14 @@
 import { supabase } from "./supabase.js";
 import { getCurrentAuditPeriod, getAuditPeriodStartDate, compressImage, showLoading, hideLoading, handleSupabaseError } from "./utils.js";
 
+function parseImageUrls(val) {
+  if (!val) return [];
+  if (typeof val === "string" && val.startsWith("[")) {
+    try { return JSON.parse(val); } catch {}
+  }
+  return typeof val === "string" ? [val] : [];
+}
+
 /* ===================== NAVIGATION PROTECTION ===================== */
 window.addEventListener("beforeunload", (e) => {
   const zone = document.getElementById("zone")?.value;
@@ -197,7 +205,7 @@ function isRowComplete(tr) {
 
   const status = statusEl?.value || "";
   const comment = commentEl?.value?.trim() || "";
-  const hasFile = fileEl?.files && fileEl.files.length > 0;
+  const hasFile = (fileEl?.files && fileEl.files.length > 0) || tr.dataset.hasImages === "1";
 
   if (status === "") return false;
   if (comment === "") return false;
@@ -559,7 +567,6 @@ async function getOrCreateAuditSession(atelier, audit, zone) {
       user_id: userId,
       audit: fullAuditName,
       zone: zone || null,
-      souszone: null,
       created_at: new Date().toISOString(),
     })
     .select("id")
@@ -599,20 +606,24 @@ async function uploadImageToStorage(file) {
   return data.publicUrl || "";
 }
 
-async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, file }) {
+async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, files, existingUrls }) {
   if (!currentSessionId) return;
 
-  let image_url = null;
+  const urls = [...(existingUrls || [])];
   try {
-    if (file) {
-      const compressedFile = await compressImage(file);
-      const url = await uploadImageToStorage(compressedFile);
-      image_url = url || null;
+    for (const f of (files || [])) {
+      const compressed = await compressImage(f);
+      const url = await uploadImageToStorage(compressed);
+      if (url) urls.push(url);
     }
   } catch (e) {
     handleSupabaseError(e, "Erreur upload image");
     return;
   }
+
+  const image_url = urls.length === 0 ? null
+    : urls.length === 1 ? urls[0]
+    : JSON.stringify(urls);
 
   const { error } = await supabase
     .from("audit_answers")
@@ -726,7 +737,7 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         <td>
           <input type="text" name="comment_0_${qIndex}" placeholder="Commentaire..." />
         </td>
-        ${isMobile ? `<td><input type="file" name="image_0_${qIndex}" accept="image/png, image/jpeg, image/jpg" /></td>` : ''}
+        ${isMobile ? `<td><input type="file" name="image_0_${qIndex}" accept="image/png, image/jpeg, image/jpg" multiple /></td>` : ''}
       `;
 
       tbody.appendChild(tr);
@@ -742,7 +753,10 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         statusEl.value = mapStatusVal(ex.status);
         commentEl.value = ex.comment || "";
         if (ex.image_url && isMobile) {
-          fileEl?.insertAdjacentHTML("beforebegin", `<a href="${ex.image_url}" target="_blank" title="Voir l'image actuelle" style="margin-right:10px; font-size:1.4rem; text-decoration:none;">🖼️</a>`);
+          tr.dataset.hasImages = "1";
+          const urls = parseImageUrls(ex.image_url);
+          const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
+          fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
         }
       }
 
@@ -750,14 +764,16 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         const val = statusEl?.value || "";
         const statusLabel = statusValueToLabel(val);
         const comment = commentEl?.value?.trim() || "";
-        const file = fileEl?.files?.[0] || null;
+        const files = Array.from(fileEl?.files || []);
+        const existingUrls = parseImageUrls(ex?.image_url);
 
         await saveAnswer({
           rubriqueTitle: "Questions",
           question: questionText,
           statusLabel,
           comment,
-          file,
+          files,
+          existingUrls,
         });
       };
 
@@ -877,7 +893,7 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         <td>
           <input type="text" name="comment_${index}_${qIndex}" placeholder="Commentaire..." />
         </td>
-        ${isMobile ? `<td><input type="file" name="image_${index}_${qIndex}" accept="image/png, image/jpeg, image/jpg" /></td>` : ''}
+        ${isMobile ? `<td><input type="file" name="image_${index}_${qIndex}" accept="image/png, image/jpeg, image/jpg" multiple /></td>` : ''}
       `;
 
       tbody.appendChild(tr);
@@ -895,7 +911,10 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         statusEl.value = mapStatusVal(ex.status);
         commentEl.value = ex.comment || "";
         if (ex.image_url && isMobile) {
-          fileEl?.insertAdjacentHTML("beforebegin", `<a href="${ex.image_url}" target="_blank" title="Voir l'image actuelle" style="margin-right:10px; font-size:1.4rem; text-decoration:none;">🖼️</a>`);
+          tr.dataset.hasImages = "1";
+          const urls = parseImageUrls(ex.image_url);
+          const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
+          fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
         }
       }
 
@@ -903,14 +922,16 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         const val = statusEl?.value || "";
         const statusLabel = statusValueToLabel(val);
         const comment = commentEl?.value?.trim() || "";
-        const file = fileEl?.files?.[0] || null;
+        const files = Array.from(fileEl?.files || []);
+        const existingUrls = parseImageUrls(ex?.image_url);
 
         await saveAnswer({
           rubriqueTitle,
           question: questionText,
           statusLabel,
           comment,
-          file,
+          files,
+          existingUrls,
         });
       };
 
@@ -982,7 +1003,8 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
       question: "Remarques",
       statusLabel: "Information",
       comment: textareaAutres.value.trim(),
-      file: null
+      files: [],
+      existingUrls: [],
     });
   };
 
@@ -1095,7 +1117,7 @@ downloadBtn?.addEventListener("click", async () => {
 
         const { data: sessions } = await supabase
           .from("audit_sessions")
-          .select("id, zone, souszone")
+          .select("id, zone")
           .eq("audit", fullAuditName)
           .eq("user_id", userId)
           .gte("created_at", periodStartDate);
@@ -1122,16 +1144,21 @@ downloadBtn?.addEventListener("click", async () => {
               answerMap[key] = a;
 
               if (a.image_url && !a.image_url.includes("undefined")) {
+                parseImageUrls(a.image_url).forEach(url => {
                 imagePromises.push(
-                  fetch(a.image_url)
+                  fetch(url)
                     .then(r => r.blob())
                     .then(blob => {
                       const file = new File([blob], "img.jpg", { type: blob.type });
                       return readImageCompressed(file, 400, 0.7);
                     })
-                    .then(img => { preloadedImages[a.id] = img; })
+                    .then(img => {
+                      if (!preloadedImages[a.id]) preloadedImages[a.id] = [];
+                      preloadedImages[a.id].push(img);
+                    })
                     .catch(() => {})
                 );
+                }); // end parseImageUrls forEach
               }
             });
           }

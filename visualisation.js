@@ -2,8 +2,8 @@ import { supabase } from "./supabase.js";
 import { handleSupabaseError, clearAuditProgress } from "./utils.js";
 
 /* ===================== SESSION CHECK & SECURITY ===================== */
-//const { data: sessionData } = await supabase.auth.getSession();
-//if (!sessionData.session) window.location.href = "login.html?redirect=visualisation.html";
+const { data: sessionData } = await supabase.auth.getSession();
+if (!sessionData.session) window.location.href = "login.html?redirect=visualisation.html";
 
 document.getElementById("operatorName").textContent =
     "Bienvenue" ;
@@ -420,13 +420,70 @@ document.addEventListener("click", e => {
     }
 });
 
+/* ===================== DOWNLOAD HISTORY ===================== */
+
+async function saveDownloadHistory(title) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const userId = session.user.id;
+
+    const { data: report, error } = await supabase
+        .from("reports")
+        .insert({ user_id: userId, title, status: "downloaded" })
+        .select("id")
+        .single();
+
+    if (error || !report) return;
+
+    await supabase
+        .from("report_downloads")
+        .insert({ report_id: report.id, user_id: userId });
+
+    loadDownloadHistory();
+}
+
+async function loadDownloadHistory() {
+    const historyList = document.getElementById("downloadHistoryList");
+    if (!historyList) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data, error } = await supabase
+        .from("report_downloads")
+        .select("created_at, reports(title)")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+    if (error || !data?.length) {
+        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;">Aucun téléchargement enregistré.</p>`;
+        return;
+    }
+
+    historyList.innerHTML = data.map(row => {
+        const date = new Date(row.created_at).toLocaleString("fr-FR", {
+            day: "2-digit", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+        });
+        const title = row.reports?.title ?? "Rapport";
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--surface-border);font-size:0.85rem;">
+            <span style="color:var(--text-main);">📄 ${title}</span>
+            <span style="color:#94a3b8;white-space:nowrap;margin-left:12px;">${date}</span>
+        </div>`;
+    }).join("");
+}
+
 /* ===================== DOWNLOAD CHART ===================== */
 
-downloadBtn.addEventListener("click", () => {
+downloadBtn.addEventListener("click", async () => {
     const link = document.createElement("a");
-    link.download = `score-audit-${(auditSelect.value || "chart").toLowerCase()}.png`;
+    const auditName = auditSelect.value || "chart";
+    link.download = `score-audit-${auditName.toLowerCase()}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+    await saveDownloadHistory(`Graphique — ${auditName}`);
 });
 
 /* ===================== RAPPORT NON-CONFORMITÉS ===================== */
@@ -523,7 +580,13 @@ rapportNcBtn.addEventListener("click", async () => {
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
+
+    await saveDownloadHistory("Rapport Non-conformités");
 });
+
+/* ===================== INIT ===================== */
+
+loadDownloadHistory();
 
 /* ===================== LOGOUT ===================== */
 

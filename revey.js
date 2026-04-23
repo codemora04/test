@@ -640,7 +640,8 @@ async function saveAnswer({ rubriqueTitle, question, statusLabel, comment, files
       { onConflict: "session_id,rubrique,question" }
     );
 
-  if (error) handleSupabaseError(error, "Erreur sauvegarde réponse");
+  if (error) { handleSupabaseError(error, "Erreur sauvegarde réponse"); return null; }
+  return image_url;
 }
 function isSafetyAuditSelected() {
   const val = auditSelect?.value?.toLowerCase() || "";
@@ -748,39 +749,38 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
 
       const questionText = q;
       const ex = ansMap[`Questions|${questionText}`];
+      let currentImageUrls = parseImageUrls(ex?.image_url);
 
       if (ex) {
         statusEl.value = mapStatusVal(ex.status);
         commentEl.value = ex.comment || "";
         if (ex.image_url && isMobile) {
           tr.dataset.hasImages = "1";
-          const urls = parseImageUrls(ex.image_url);
-          const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
-          fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
+          refreshImageLinks();
         }
       }
 
-      const saveAction = async () => {
-        const val = statusEl?.value || "";
-        const statusLabel = statusValueToLabel(val);
-        const comment = commentEl?.value?.trim() || "";
-        const files = Array.from(fileEl?.files || []);
-        const existingUrls = parseImageUrls(ex?.image_url);
-
-        await saveAnswer({
-          rubriqueTitle: "Questions",
-          question: questionText,
-          statusLabel,
-          comment,
-          files,
-          existingUrls,
+      function refreshImageLinks() {
+        tr.querySelectorAll("a[data-img]").forEach(a => a.remove());
+        currentImageUrls.forEach((u, i) => {
+          const a = document.createElement("a");
+          a.href = u; a.target = "_blank"; a.dataset.img = "1";
+          a.style.cssText = "margin-right:6px;font-size:1.3rem;text-decoration:none;";
+          a.textContent = `🖼️${currentImageUrls.length > 1 ? i + 1 : ""}`;
+          fileEl?.before(a);
         });
+      }
+
+      const metaSave = async () => {
+        const statusLabel = statusValueToLabel(statusEl?.value || "");
+        const comment = commentEl?.value?.trim() || "";
+        await saveAnswer({ rubriqueTitle: "Questions", question: questionText, statusLabel, comment, files: [], existingUrls: currentImageUrls });
       };
 
-      const debouncedSave = debounce(saveAction, 500);
+      const debouncedSave = debounce(metaSave, 500);
 
       statusEl.addEventListener("change", () => {
-        saveAction();
+        metaSave();
         updateRowColor(tr);
         computeViewProgress();
       });
@@ -791,8 +791,18 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         computeViewProgress();
       });
 
-      fileEl?.addEventListener("change", () => {
-        saveAction();
+      fileEl?.addEventListener("change", async () => {
+        const newFiles = Array.from(fileEl?.files || []);
+        if (!newFiles.length) return;
+        const statusLabel = statusValueToLabel(statusEl?.value || "");
+        const comment = commentEl?.value?.trim() || "";
+        const saved = await saveAnswer({ rubriqueTitle: "Questions", question: questionText, statusLabel, comment, files: newFiles, existingUrls: currentImageUrls });
+        if (saved !== null) {
+          currentImageUrls = parseImageUrls(saved);
+          tr.dataset.hasImages = currentImageUrls.length > 0 ? "1" : "";
+          if (isMobile) refreshImageLinks();
+        }
+        fileEl.value = "";
         updateRowColor(tr);
         computeViewProgress();
       });
@@ -907,38 +917,38 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
 
       // On essaye de récupérer la réponse avec le vrai titre de la rubrique, ou l'ancien (nom de la sous-zone) par rétrocompatibilité
       const ex = ansMap[`${rubriqueTitle}|${questionText}`] || ansMap[`${rubrique}|${questionText}`];
+      let currentImageUrls = parseImageUrls(ex?.image_url);
+
       if (ex) {
         statusEl.value = mapStatusVal(ex.status);
         commentEl.value = ex.comment || "";
         if (ex.image_url && isMobile) {
           tr.dataset.hasImages = "1";
-          const urls = parseImageUrls(ex.image_url);
-          const linksHtml = urls.map((u, i) => `<a href="${u}" target="_blank" style="margin-right:6px;font-size:1.3rem;text-decoration:none;">🖼️${urls.length > 1 ? i + 1 : ""}</a>`).join("");
-          fileEl?.insertAdjacentHTML("beforebegin", linksHtml);
+          refreshImageLinks();
         }
       }
 
-      const saveAction = async () => {
-        const val = statusEl?.value || "";
-        const statusLabel = statusValueToLabel(val);
-        const comment = commentEl?.value?.trim() || "";
-        const files = Array.from(fileEl?.files || []);
-        const existingUrls = parseImageUrls(ex?.image_url);
-
-        await saveAnswer({
-          rubriqueTitle,
-          question: questionText,
-          statusLabel,
-          comment,
-          files,
-          existingUrls,
+      function refreshImageLinks() {
+        tr.querySelectorAll("a[data-img]").forEach(a => a.remove());
+        currentImageUrls.forEach((u, i) => {
+          const a = document.createElement("a");
+          a.href = u; a.target = "_blank"; a.dataset.img = "1";
+          a.style.cssText = "margin-right:6px;font-size:1.3rem;text-decoration:none;";
+          a.textContent = `🖼️${currentImageUrls.length > 1 ? i + 1 : ""}`;
+          fileEl?.before(a);
         });
+      }
+
+      const metaSave = async () => {
+        const statusLabel = statusValueToLabel(statusEl?.value || "");
+        const comment = commentEl?.value?.trim() || "";
+        await saveAnswer({ rubriqueTitle, question: questionText, statusLabel, comment, files: [], existingUrls: currentImageUrls });
       };
 
-      const debouncedSave = debounce(saveAction, 500);
+      const debouncedSave = debounce(metaSave, 500);
 
       statusEl.addEventListener("change", () => {
-        saveAction();
+        metaSave();
         updateRowColor(tr);
         computeViewProgress();
       });
@@ -949,8 +959,18 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
         computeViewProgress();
       });
 
-      fileEl?.addEventListener("change", () => {
-        saveAction();
+      fileEl?.addEventListener("change", async () => {
+        const newFiles = Array.from(fileEl?.files || []);
+        if (!newFiles.length) return;
+        const statusLabel = statusValueToLabel(statusEl?.value || "");
+        const comment = commentEl?.value?.trim() || "";
+        const saved = await saveAnswer({ rubriqueTitle, question: questionText, statusLabel, comment, files: newFiles, existingUrls: currentImageUrls });
+        if (saved !== null) {
+          currentImageUrls = parseImageUrls(saved);
+          tr.dataset.hasImages = currentImageUrls.length > 0 ? "1" : "";
+          if (isMobile) refreshImageLinks();
+        }
+        fileEl.value = "";
         updateRowColor(tr);
         computeViewProgress();
       });

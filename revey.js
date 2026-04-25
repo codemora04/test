@@ -1408,7 +1408,11 @@ downloadBtn?.addEventListener("click", async () => {
                 alternateRowStyles: { fillColor: [248, 250, 252] },
                 columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 20, halign: "center" }, 2: { cellWidth: 55 }, 3: { cellWidth: 25 } },
                 didParseCell: (data) => {
-                  if (data.section === "body" && data.column.index === 3) data.cell.text = [""];
+                  if (data.section === "body" && data.column.index === 3) {
+                    data.cell.text = [""];
+                    const imgs = imagesMap.get(data.row.index);
+                    if (imgs?.length > 1) data.cell.styles.minCellHeight = imgs.length * 22;
+                  }
                   if (data.section === "body" && data.column.index === 1) {
                     const val = data.cell.raw;
                     if (val === "Good" || val === "Oui") data.cell.styles.textColor = [16, 185, 129];
@@ -1417,9 +1421,13 @@ downloadBtn?.addEventListener("click", async () => {
                 },
                 didDrawCell: (data) => {
                   if (data.section === "body" && data.column.index === 3) {
-                    const img = imagesMap.get(data.row.index);
-                    if (img) {
-                      doc.addImage(img, "JPEG", data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4);
+                    const imgs = imagesMap.get(data.row.index);
+                    if (imgs?.length) {
+                      const imgW = data.cell.width - 4;
+                      const imgH = (data.cell.height - 4) / imgs.length;
+                      imgs.forEach((imgData, i) => {
+                        doc.addImage(imgData, "JPEG", data.cell.x + 2, data.cell.y + 2 + i * imgH, imgW, imgH - 1);
+                      });
                     }
                   }
                 },

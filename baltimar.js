@@ -483,7 +483,7 @@ function showSummary() {
 
 /* ===================== STATUS OPTIONS ===================== */
 function getStatusOptions(auditName) {
-  if (auditName === "Audit Safety-Chasse au anomalies") {
+  if (auditName.includes("Safety")) {
     return `
       <option value="">--</option>
       <option value="oui">Oui</option>
@@ -749,9 +749,9 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
   existingAnswers.forEach(a => ansMap[`${a.rubrique}|${a.question}`] = a);
 
   function mapStatusVal(auditName, statusLabel) {
-    if (auditName === "Audit Safety-Chasse au anomalies") {
-      if (statusLabel === "Oui") return "oui";
-      if (statusLabel === "Non") return "non";
+    if (auditName.includes("Safety")) {
+      if (statusLabel === "Oui" || statusLabel === "Good") return "oui";
+      if (statusLabel === "Non" || statusLabel === "Unsatisfactory") return "non";
       if (statusLabel === "Non applicable") return "na";
       return "";
     }
@@ -1094,6 +1094,7 @@ async function readImageCompressed(file, maxW = 900, quality = 0.7) {
 }
 
 /* ===================== PDF DOWNLOAD (FULL REPORT) ===================== */
+/* ===================== PDF DOWNLOAD (FULL REPORT) ===================== */
 downloadBtn?.addEventListener("click", async () => {
   try {
     const { jsPDF } = window.jspdf;
@@ -1107,6 +1108,10 @@ downloadBtn?.addEventListener("click", async () => {
     const username = localStorage.getItem("username") || "Auditeur";
     const dateStr = new Date().toLocaleDateString("fr-FR");
     const timeStr = new Date().toLocaleTimeString("fr-FR");
+    
+    // Générer un nom de fichier unique
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const fileName = `Rapport_Audit_Baltimar_${audit.replace(/\s/g, "_")}_${timestamp}.pdf`;
 
     // Couleurs
     const colorSlate = [30, 41, 59]; 
@@ -1183,7 +1188,7 @@ downloadBtn?.addEventListener("click", async () => {
             answers.forEach(a => {
               const sess = sessionMap[a.session_id];
               if (!sess || !sess.zone) return;
-              const key = `${sess.zone}|${sess.souszone || "_direct"}|${a.rubrique || "Questions"}|${a.question}`;
+              const key = `${sess.zone}|${a.rubrique || "Questions"}|${a.question}`;
               answerMap[key] = a;
 
               if (a.image_url && !a.image_url.includes("undefined")) {
@@ -1215,7 +1220,7 @@ downloadBtn?.addEventListener("click", async () => {
         let totalQ = 0;
         const zoneScores = {};
         const selectedZone = zoneSelect.value;
-        const isSafety =audit.includes("Safety");
+        const isSafety = audit.includes("Safety");
         
         for (const [zName, zoneData] of Object.entries(auditData)) {
           if (isSafety && zName !== selectedZone) {
@@ -1238,9 +1243,9 @@ downloadBtn?.addEventListener("click", async () => {
             for (const [rName, questions] of Object.entries(rubriquesObj)) {
               tree[zName]["_direct"][rName] = [];
               (questions || []).forEach(q => {
-                const key = `${zName}|_direct|${rName}|${q}`;
+                const key = `${zName}|${rName}|${q}`;
                 const ans = answerMap[key] || null;
-                
+
                 const status = ans?.status || "";
                 let isGood = false;
                 let count = false;
@@ -1249,7 +1254,7 @@ downloadBtn?.addEventListener("click", async () => {
                   if (isSafety) {
                     if (status !== "Non applicable") {
                       count = true;
-                      if (status === "Oui") isGood = true;
+                      if (status === "Oui" || status === "Good" || status === "1") isGood = true;
                     }
                   } else {
                     count = true;
@@ -1282,9 +1287,9 @@ downloadBtn?.addEventListener("click", async () => {
               for (const [rName, questions] of Object.entries(rubriquesObj)) {
                 tree[zName][szName][rName] = [];
                 (questions || []).forEach(q => {
-                  const key = `${zName}|${szName}|${rName}|${q}`;
+                  const key = `${zName}|${rName}|${q}`;
                   const ans = answerMap[key] || null;
-                  
+
                   const status = ans?.status || "";
                   let isGood = false;
                   let count = false;
@@ -1293,7 +1298,7 @@ downloadBtn?.addEventListener("click", async () => {
                     if (isSafety) {
                       if (status !== "Non applicable") {
                         count = true;
-                        if (status === "Oui") isGood = true;
+                        if (status === "Oui" || status === "Good" || status === "1") isGood = true;
                       }
                     } else {
                       count = true;
@@ -1477,39 +1482,84 @@ downloadBtn?.addEventListener("click", async () => {
               y = doc.lastAutoTable.finalY + 10;
             }
 
-            // ✅ AJOUT SECTION "AUTRES" DANS LE PDF (par sous-zone ou direct)
-            const remarkKey = `${zName}|${szName}|Autres|Remarques`;
-            const remarkAns = answerMap[remarkKey];
-            if (remarkAns && remarkAns.comment && remarkAns.comment.trim() !== "") {
-              const commentText = remarkAns.comment.trim();
-              const splitText = doc.splitTextToSize(commentText, pageWidth - 40);
-              const boxHeight = 15 + (splitText.length * 5); // Base 15 + 5 per line
+          }
 
-              if (y > pageHeight - (boxHeight + 10)) { doc.addPage(); currentPage++; addPageDesign(currentPage); y = 50; }
-              
-              doc.setFillColor(248, 250, 252);
-              doc.setDrawColor(200, 200, 200);
-              doc.roundedRect(14, y, pageWidth - 28, boxHeight, 2, 2, "FD");
-              
-              doc.setTextColor(...colorSlate);
-              doc.setFontSize(10);
-              doc.setFont(undefined, "bold");
-              doc.text("Autres (Remarques générales) :", 18, y + 8);
-              
-              doc.setFont(undefined, "normal");
-              doc.setFontSize(9);
-              doc.text(splitText, 18, y + 15);
-              y += boxHeight + 10;
-            }
+          // ✅ AJOUT SECTION "AUTRES" DANS LE PDF (par zone)
+          const remarkKey = `${zName}|Autres|Remarques`;
+          const remarkAns = answerMap[remarkKey];
+          if (remarkAns && remarkAns.comment && remarkAns.comment.trim() !== "") {
+            const commentText = remarkAns.comment.trim();
+            const splitText = doc.splitTextToSize(commentText, pageWidth - 40);
+            const boxHeight = 15 + (splitText.length * 5);
+
+            if (y > pageHeight - (boxHeight + 10)) { doc.addPage(); currentPage++; addPageDesign(currentPage); y = 50; }
+
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(200, 200, 200);
+            doc.roundedRect(14, y, pageWidth - 28, boxHeight, 2, 2, "FD");
+
+            doc.setTextColor(...colorSlate);
+            doc.setFontSize(10);
+            doc.setFont(undefined, "bold");
+            doc.text("Autres (Remarques générales) :", 18, y + 8);
+
+            doc.setFont(undefined, "normal");
+            doc.setFontSize(9);
+            doc.text(splitText, 18, y + 15);
+            y += boxHeight + 10;
           }
         }
+        
+        // Convertir le PDF en Blob pour l'envoi
+        const pdfBlob = doc.output('blob');
+        
+        // Télécharger localement
+        doc.save(fileName);
+        
+        // Envoyer vers Supabase Storage
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from('reports')
+            .upload(`${userId}/${audit.replace(/\s/g, "_")}/${fileName}`, pdfBlob, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType: 'application/pdf'
+            });
+          
+          if (uploadError) {
+            console.error('Erreur lors de l\'upload du rapport:', uploadError);
+            alert('Le rapport a été téléchargé localement mais n\'a pas pu être sauvegardé sur le serveur.');
+          } else {
+            console.log('Rapport sauvegardé avec succès dans le bucket reports');
+            
+            // Optionnel : Enregistrer les métadonnées du rapport dans une table
+            const { error: metadataError } = await supabase
+              .from('audit_reports')
+              .insert({
+                user_id: userId,
+                audit_name: audit,
+                filename: fileName,
+                file_path: `${userId}/${audit.replace(/\s/g, "_")}/${fileName}`,
+                generated_at: new Date().toISOString(),
+                score: globalScore,
+                period: getCurrentAuditPeriod(audit)
+              });
+            
+            if (metadataError) {
+              console.error('Erreur lors de l\'enregistrement des métadonnées:', metadataError);
+            }
+          }
+        } catch (uploadErr) {
+          console.error('Erreur upload:', uploadErr);
+          alert('Le rapport a été téléchargé localement mais l\'upload vers le serveur a échoué.');
+        }
+        
       } catch (e) {
         console.error("PDF generation err:", e);
         alert("Erreur: " + e.message);
       } finally {
         hideLoading();
       }
-      doc.save(`Rapport_Audit_Baltimar_${dateStr.replace(/\//g, "-")}.pdf`);
     };
 
     await generatePDF();
@@ -1564,7 +1614,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
         const sess = sessionMap[a.session_id];
         if (!sess) return;
 
-        const key = `${sess.zone}|${sess.souszone || "_direct"}|${a.rubrique || "Questions"}|${a.question}`;
+        const key = `${sess.zone}|${a.rubrique || "Questions"}|${a.question}`;
         answerMap[key] = a;
       });
     }
@@ -1582,7 +1632,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
         if (isSafetyAudit) {
           if (status !== "Non applicable") {
             isApplicable = true;
-            if (status === "Oui") isGood = true;
+            if (status === "Oui" || status === "Good" || status === "1") isGood = true;
           }
         } else {
           isApplicable = true;
@@ -1634,7 +1684,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
           
         for (const [rName, questions] of Object.entries(rubriquesObj)) {
           (questions || []).forEach(q => {
-            const key = `${zName}|_direct|${rName}|${q}`;
+            const key = `${zName}|${rName}|${q}`;
             const { isGood, isApplicable } = evalAnswer(answerMap[key]);
 
             if (isApplicable) {
@@ -1660,7 +1710,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
 
           for (const [rName, questions] of Object.entries(rubriquesObj)) {
             (questions || []).forEach(q => {
-              const key = `${zName}|${szName}|${rName}|${q}`;
+              const key = `${zName}|${rName}|${q}`;
               const { isGood, isApplicable } = evalAnswer(answerMap[key]);
 
               if (isApplicable) {
@@ -1703,7 +1753,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
           
         for (const [rName, questions] of Object.entries(rubriquesObj)) {
           (questions || []).forEach(q => {
-            const key = `${zName}|_direct|${rName}|${q}`;
+            const key = `${zName}|${rName}|${q}`;
             const ans = answerMap[key];
 
             reportRows.push([
@@ -1721,7 +1771,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
         }
 
         // ✅ AJOUT REMARQUE "AUTRES" (DIRECT)
-        const remarkKey = `${zName}|_direct|Autres|Remarques`;
+        const remarkKey = `${zName}|Autres|Remarques`;
         const remarkAns = answerMap[remarkKey];
         if (remarkAns && remarkAns.comment && remarkAns.comment.trim() !== "") {
           reportRows.push([zName, "", "Autres", "Remarques générales", "Information", remarkAns.comment.trim(), "", "", ""]);
@@ -1736,7 +1786,7 @@ downloadScoreBtn?.addEventListener("click", async () => {
 
           for (const [rName, questions] of Object.entries(rubriquesObj)) {
             (questions || []).forEach(q => {
-              const key = `${zName}|${szName}|${rName}|${q}`;
+              const key = `${zName}|${rName}|${q}`;
               const ans = answerMap[key];
 
               reportRows.push([
@@ -1752,13 +1802,13 @@ downloadScoreBtn?.addEventListener("click", async () => {
               ]);
             });
           }
+        }
 
-          // ✅ AJOUT REMARQUE "AUTRES" (SOUS-ZONE)
-          const remarkKey = `${zName}|${szName}|Autres|Remarques`;
-          const remarkAns = answerMap[remarkKey];
-          if (remarkAns && remarkAns.comment && remarkAns.comment.trim() !== "") {
-            reportRows.push([zName, szName, "Autres", "Remarques générales", "Information", remarkAns.comment.trim(), "", "", ""]);
-          }
+        // ✅ AJOUT REMARQUE "AUTRES" (PAR ZONE)
+        const remarkKey = `${zName}|Autres|Remarques`;
+        const remarkAns = answerMap[remarkKey];
+        if (remarkAns && remarkAns.comment && remarkAns.comment.trim() !== "") {
+          reportRows.push([zName, "", "Autres", "Remarques générales", "Information", remarkAns.comment.trim(), "", "", ""]);
         }
       }
     }

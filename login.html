@@ -8,82 +8,10 @@
   <link rel="icon" type="image/png" href="logo4.png">
   <meta name="theme-color" content="#0f172a">
   <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 20px;
-      padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .back-link {
-      position: absolute;
-      top: 24px;
-      left: 24px;
-    }
-
-    form {
-      position: relative;
-      z-index: 1;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 44px;
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255,255,255,0.7);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
-      text-align: center;
-      width: 100%;
-      max-width: 420px;
-    }
-
-    .login-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #d1fae5, #6ee7b7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      margin: 0 auto 20px;
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
-    }
-
-    h2 {
-      margin-bottom: 30px;
-      color: var(--text-main);
-      font-size: 1.6rem;
-    }
-
-    .login-subtitle {
-      font-size: 0.92rem;
-      color: #64748b;
-      margin-top: -20px;
-      margin-bottom: 28px;
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      margin-top: 25px;
-      padding: 15px;
-      font-size: 1.05rem;
-    }
-
-    @media (max-width: 480px) {
-      form { padding: 32px 22px; }
-      .back-link { top: 16px; left: 16px; }
-    }
-
-  </style>
 </head>
 <script src="./pwa.js"></script>
 
-<body>
+<body class="page-login">
 
   <!-- Back to landing -->
   <a href="landing.html" class="back-link" id="back-landing">

@@ -175,12 +175,37 @@ auditSelect.addEventListener("change", async () => {
     hideChart();
     if (!audit) return;
 
-    // 1. Fetch sessions for this audit
-    const { data: sessions, error: sessErr } = await supabase
+    // Determine valid zones for the selected company + atelier + audit
+    const company = companySelect.value;
+    const atelier = atelierSelect.value;
+    let validZones = null;
+
+    if (company === "BALTIMAR" && DICT_BALTIMAR) {
+        const auditData = DICT_BALTIMAR[audit];
+        if (auditData) validZones = Object.keys(auditData);
+    } else if (company === "REVEY" && atelier && DICT_REVEY) {
+        const auditData = DICT_REVEY[atelier]?.[audit];
+        if (auditData) validZones = Object.keys(auditData);
+    }
+
+    // 1. Fetch sessions for this audit, filtered by valid zones to avoid
+    //    cross-company contamination when audit names overlap (e.g. "Audit GMP")
+    // Revey sessions are stored with the atelier prefix: "Atelier — Audit"
+    const auditQueryName = (company === "REVEY" && atelier)
+        ? `${atelier} — ${audit}`
+        : audit;
+
+    let sessionsQuery = supabase
         .from("audit_sessions")
         .select("id, zone, created_at")
-        .eq("audit", audit)
+        .eq("audit", auditQueryName)
         .order("created_at", { ascending: true });
+
+    if (validZones?.length) {
+        sessionsQuery = sessionsQuery.in("zone", validZones);
+    }
+
+    const { data: sessions, error: sessErr } = await sessionsQuery;
 
     if (sessErr || !sessions?.length) {
         noDataMessage.classList.remove("hidden");
@@ -217,16 +242,20 @@ auditSelect.addEventListener("change", async () => {
     // 4. Aggregate scores by date and zone
     const timelineStats = {};
     const uniqueZones = new Set();
+    const safetyAudit = isSafetyAudit();
 
     answers.forEach(ans => {
         const info = sessionMap[ans.session_id];
         if (!info) return;
 
         const { zone, date } = info;
-        uniqueZones.add(zone);
 
         if (!timelineStats[date])        timelineStats[date] = {};
         if (!timelineStats[date][zone])  timelineStats[date][zone] = { total: 0, good: 0 };
+        uniqueZones.add(zone);
+
+        // Pour les audits safety, "Non applicable" est exclu du calcul du score
+        if (safetyAudit && ans.status === "Non applicable") return;
 
         timelineStats[date][zone].total++;
         const isGood = ans.status === "Good" || ans.status === "Oui" || ans.status === "1";
@@ -246,7 +275,8 @@ auditSelect.addEventListener("change", async () => {
         const color = `hsl(${(index * 137.5) % 360}, 70%, 50%)`;
         const dataPoints = labels.map(date => {
             const stats = timelineStats[date]?.[zone];
-            return stats ? Math.round((stats.good / stats.total) * 100) : null;
+            if (!stats || stats.total === 0) return null;
+            return Math.round((stats.good / stats.total) * 100);
         });
         return {
             label: zone,
@@ -369,7 +399,7 @@ function renderSummaryTable(labels, timelineStats, zonesToChart) {
 
     zonesToChart.forEach(zone => {
         const stats = timelineStats[latestPeriod]?.[zone];
-        const score = stats?.total ? Math.round((stats.good / stats.total) * 100) : 0;
+        const score = (stats && stats.total > 0) ? Math.round((stats.good / stats.total) * 100) : 0;
 
         // Main zone row
         const tr = document.createElement("tr");
@@ -420,55 +450,50 @@ document.addEventListener("click", e => {
 
 /* ===================== DOWNLOAD HISTORY ===================== */
 
-async function saveDownloadHistory(title) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const userId = session.user.id;
-
-    const { data: report, error } = await supabase
-        .from("reports")
-        .insert({ user_id: userId, title, status: "downloaded" })
-        .select("id")
-        .single();
-
-    if (error || !report) return;
-
-    await supabase
-        .from("report_downloads")
-        .insert({ report_id: report.id, user_id: userId });
-
-    loadDownloadHistory();
-}
-
 async function loadDownloadHistory() {
     const historyList = document.getElementById("downloadHistoryList");
     if (!historyList) return;
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const { data, error } = await supabase.storage
+        .from("reports")
+        .list("", { limit: 20, sortBy: { column: "created_at", order: "desc" } });
 
-    const { data, error } = await supabase
-        .from("report_downloads")
-        .select("created_at, reports(title)")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-    if (error || !data?.length) {
-        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;">Aucun téléchargement enregistré.</p>`;
+    if (error) {
+        console.error("Erreur chargement rapports:", error);
+        historyList.innerHTML = `<p style="color:#f87171;text-align:center;font-size:0.85rem;padding:16px;">Erreur : ${error.message}</p>`;
         return;
     }
 
-    historyList.innerHTML = data.map(row => {
-        const date = new Date(row.created_at).toLocaleString("fr-FR", {
+    const files = (data || []).filter(f => f.name && f.name !== ".emptyFolderPlaceholder");
+
+    if (!files.length) {
+        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;padding:16px;">Aucun rapport d'audit enregistré.</p>`;
+        return;
+    }
+
+    historyList.innerHTML = files.map(file => {
+        const { data: urlData } = supabase.storage.from("reports").getPublicUrl(file.name);
+        const date = new Date(file.created_at).toLocaleString("fr-FR", {
             day: "2-digit", month: "short", year: "numeric",
             hour: "2-digit", minute: "2-digit"
         });
-        const title = row.reports?.title ?? "Rapport";
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--surface-border);font-size:0.85rem;">
-            <span style="color:var(--text-main);">📄 ${title}</span>
-            <span style="color:#94a3b8;white-space:nowrap;margin-left:12px;">${date}</span>
+        const title = file.name.replace(/^\d+_/, "").replace(/[-_]/g, " ").replace(/\.\w+$/, "");
+        return `
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    padding:10px 14px;border-bottom:1px solid var(--surface-border);">
+            <div style="min-width:0;">
+                <span style="display:block;color:var(--text-main);font-size:0.85rem;
+                             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    📄 ${title}
+                </span>
+                <span style="display:block;color:#94a3b8;font-size:0.78rem;">${date}</span>
+            </div>
+            <a href="${urlData.publicUrl}" target="_blank" rel="noopener"
+               style="flex-shrink:0;margin-left:12px;background:#3b82f6;color:white;
+                      padding:5px 12px;border-radius:6px;text-decoration:none;
+                      font-size:0.8rem;white-space:nowrap;">
+                Ouvrir
+            </a>
         </div>`;
     }).join("");
 }
@@ -476,111 +501,51 @@ async function loadDownloadHistory() {
 /* ===================== DOWNLOAD CHART ===================== */
 
 downloadBtn.addEventListener("click", async () => {
-    const link = document.createElement("a");
     const auditName = auditSelect.value || "chart";
+    const fileName  = `${Date.now()}_score-audit-${auditName.toLowerCase()}.png`;
+
+    // Télécharger localement
+    const link = document.createElement("a");
     link.download = `score-audit-${auditName.toLowerCase()}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-    await saveDownloadHistory(`Graphique — ${auditName}`);
+
+    // Envoyer automatiquement vers Supabase Storage
+    canvas.toBlob(async (blob) => {
+        const { error: storageError } = await supabase.storage
+            .from("reports")
+            .upload(fileName, blob, { contentType: "image/png" });
+
+        if (storageError) {
+            console.error("Erreur upload graphique:", storageError);
+            return;
+        }
+
+        const { data: urlData } = supabase.storage
+            .from("reports")
+            .getPublicUrl(fileName);
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { error: dbError } = await supabase
+            .from("reports")
+            .insert({
+                title:    `Graphique — ${auditName}`,
+                file_url: urlData.publicUrl,
+                user_id:  user?.id ?? null,
+                status:   "uploaded",
+            });
+
+        if (dbError) {
+            console.error("Erreur enregistrement graphique:", dbError);
+            return;
+        }
+
+        await loadDownloadHistory();
+    }, "image/png");
 });
 
-/* ===================== RAPPORT NON-CONFORMITÉS ===================== */
 
-const rapportNcBtn = document.getElementById("rapportNcBtn");
-
-rapportNcBtn.addEventListener("click", async () => {
-    rapportNcBtn.disabled = true;
-    rapportNcBtn.textContent = "⏳ Chargement…";
-
-    const { data, error } = await supabase
-        .from("non_conformites")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    rapportNcBtn.disabled = false;
-    rapportNcBtn.textContent = "📄 Télécharger rapport Non-conformités";
-
-    if (error || !data) {
-        alert("Erreur lors de la récupération des non-conformités.");
-        return;
-    }
-    if (data.length === 0) {
-        alert("Aucune non-conformité enregistrée pour le moment.");
-        return;
-    }
-
-    const rows = data.map(nc => {
-        const date  = new Date(nc.created_at).toLocaleDateString("fr-FR");
-        const delai = new Date(nc.delai).toLocaleDateString("fr-FR");
-        const photo = nc.image_url
-            ? `<img src="${nc.image_url}" style="max-width:120px;max-height:90px;object-fit:contain;border-radius:6px;">`
-            : "—";
-        return `<tr>
-            <td>${date}</td>
-            <td style="max-width:260px">${nc.description}</td>
-            <td>${nc.responsable}</td>
-            <td>${delai}</td>
-            <td>${nc.auditeur || "—"}</td>
-            <td>${photo}</td>
-        </tr>`;
-    }).join("");
-
-    const generatedOn = new Date().toLocaleDateString("fr-FR", {
-        year: "numeric", month: "long", day: "numeric"
-    });
-
-    const html = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Rapport Non-conformités</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, Arial, sans-serif; padding: 36px; color: #1e293b; font-size: 13px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 3px solid #f59e0b; padding-bottom: 18px; }
-    .header h1 { font-size: 1.6rem; font-weight: 800; color: #1e293b; }
-    .header .meta { color: #64748b; margin-top: 4px; font-size: 0.85rem; }
-    .badge { background: #fef3c7; color: #b45309; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    thead th { background: #f59e0b; color: white; padding: 10px 12px; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    tbody td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-    tbody tr:nth-child(even) td { background: #f8fafc; }
-    .btn-print { margin-bottom: 24px; padding: 10px 22px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; }
-    .btn-print:hover { background: #d97706; }
-    @media print { .no-print { display: none !important; } }
-  </style>
-</head>
-<body>
-  <button class="btn-print no-print" onclick="window.print()">🖨️ Imprimer / Enregistrer en PDF</button>
-  <div class="header">
-    <div>
-      <h1>⚠️ Rapport Non-conformités</h1>
-      <div class="meta">Généré le ${generatedOn}</div>
-    </div>
-    <div class="badge">${data.length} signalement${data.length > 1 ? "s" : ""}</div>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Description</th>
-        <th>Responsable</th>
-        <th>Délai correction</th>
-        <th>Auditeur</th>
-        <th>Photo</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
-</body>
-</html>`;
-
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-
-    await saveDownloadHistory("Rapport Non-conformités");
-});
 
 /* ===================== INIT ===================== */
 

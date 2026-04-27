@@ -10,115 +10,6 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    .subzone-item:hover {
-      background: #3b82f6;
-      color: white;
-      border-color: #3b82f6;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-    }
-
-    /* SPEECH BUBBLE CSS */
-    .speech-bubble {
-      position: absolute;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      pointer-events: none;
-      /* Let clicks pass through */
-      min-width: 150px;
-    }
-
-    .speech-bubble::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -8px;
-      border-width: 8px;
-      border-style: solid;
-      border-color: white transparent transparent transparent;
-    }
-
-    .speech-bubble::before {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -9px;
-      border-width: 9px;
-      border-style: solid;
-      border-color: #e2e8f0 transparent transparent transparent;
-      z-index: -1;
-    }
-
-    .bubble-title {
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 8px;
-      font-size: 14px;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 4px;
-      text-align: center;
-    }
-
-    .bubble-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .bubble-list li {
-      font-size: 12px;
-      color: #475569;
-      padding: 3px 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .bubble-list li::before {
-      content: "•";
-      color: #3b82f6;
-      font-weight: bold;
-    }
-
-    /* ===== CHART RESPONSIVE ===== */
-    #chartContainer {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    #scoreChart {
-      min-height: 300px;
-    }
-
-    @media (max-width: 768px) {
-      #chartContainer {
-        padding: 12px 8px !important;
-        margin-top: 20px !important;
-      }
-
-      #scoreChart {
-        min-height: 280px;
-        max-height: 400px;
-      }
-
-      #summaryTableContainer {
-        padding: 12px 8px !important;
-        margin-top: 20px !important;
-      }
-
-      #summaryTableContainer h3 {
-        font-size: 1rem;
-        margin-bottom: 12px;
-      }
-    }
-  </style>
 </head>
 <script src="./pwa.js"></script>
 
@@ -198,7 +89,7 @@
     <!-- Historique des téléchargements -->
     <div style="margin-top: 30px; background: var(--surface-color); border-radius: var(--radius-lg); border: 1px solid var(--surface-border); overflow: hidden;">
       <div style="padding: 14px 20px; border-bottom: 1px solid var(--surface-border); display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="margin:0; color: var(--text-main); font-size:1rem;">🕓 Historique des téléchargements</h3>
+        <h3 style="margin:0; color: var(--text-main); font-size:1rem;">📁 Rapports d'audit enregistrés</h3>
       </div>
       <div id="downloadHistoryList" style="max-height:260px; overflow-y:auto; padding: 8px 0;">
         <p style="color:#94a3b8;text-align:center;font-size:0.85rem;padding:16px;">Chargement…</p>
@@ -206,8 +97,9 @@
     </div>
 
     <div class="btn-container" style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-      <a href="landing.html" class="btn-retour" style="text-decoration: none; text-align: center;">← Retour à l'accueil</a>
+      <a href="accueil.html" class="btn-retour" style="text-decoration: none; text-align: center;">← Retour à l'accueil</a>
     </div>
+    
   </div>
 
   <div id="zoneSpeechBubble" class="speech-bubble hidden"></div>

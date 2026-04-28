@@ -66,8 +66,60 @@ const rubriquesList = document.getElementById("rubriques-list");
 
 const downloadBtn = document.getElementById("downloadPdf");
 const downloadScoreBtn = document.getElementById("downloadScoreBtn");
+const filterIncompleteBtn = document.getElementById("filterIncompleteBtn");
 
 const userId = (await supabase.auth.getUser()).data.user?.id;
+
+let filterActive = false;
+
+function applyFilter() {
+  const headers = rubriquesList.querySelectorAll(".rubrique-header");
+  headers.forEach(header => {
+    const wrapper = header.nextElementSibling;
+    if (!wrapper) return;
+
+    // Always keep "Autres" (textarea) section visible
+    if (wrapper.querySelector("textarea")) {
+      header.style.display = "";
+      wrapper.style.display = "";
+      return;
+    }
+
+    const rows = Array.from(wrapper.querySelectorAll("tbody tr"));
+    const questionRows = rows.filter(tr => !tr.querySelector("td[colspan]"));
+    const incompleteRows = questionRows.filter(tr => !tr.classList.contains("row-complete"));
+
+    rows.forEach(tr => {
+      const isSubheader = !!tr.querySelector("td[colspan]");
+      if (filterActive && !isSubheader && tr.classList.contains("row-complete")) {
+        tr.style.display = "none";
+      } else {
+        tr.style.display = "";
+      }
+    });
+
+    if (filterActive) {
+      if (incompleteRows.length === 0) {
+        header.style.display = "none";
+        wrapper.style.display = "none";
+      } else {
+        header.style.display = "";
+        wrapper.style.display = "";
+        wrapper.classList.remove("hidden");
+      }
+    } else {
+      header.style.display = "";
+      wrapper.style.display = "";
+    }
+  });
+}
+
+filterIncompleteBtn?.addEventListener("click", () => {
+  filterActive = !filterActive;
+  filterIncompleteBtn.textContent = filterActive ? "Afficher tout" : "Afficher non complétées";
+  filterIncompleteBtn.classList.toggle("active", filterActive);
+  applyFilter();
+});
 const username = localStorage.getItem("username") || "";
 
 /* ===================== DEVICE DETECTION ===================== */
@@ -189,6 +241,9 @@ function hideAllBelowAtelier() {
   rubriqueContainer?.classList.add("hidden");
   downloadBtn?.classList.add("hidden");
   downloadScoreBtn?.classList.add("hidden");
+  filterActive = false;
+  filterIncompleteBtn?.classList.add("hidden");
+  filterIncompleteBtn?.classList.remove("active");
 
   resetSelect(auditSelect);
   resetSelect(zoneSelect);
@@ -1042,6 +1097,11 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
   rubriqueContainer?.classList.remove("hidden");
   downloadBtn?.classList.remove("hidden");
   downloadScoreBtn?.classList.remove("hidden");
+  filterActive = false;
+  if (filterIncompleteBtn) {
+    filterIncompleteBtn.classList.remove("hidden", "active");
+    filterIncompleteBtn.textContent = "Afficher non complétées";
+  }
 }
 
 /* ===================== IMAGE COMPRESS ===================== */
@@ -1462,7 +1522,45 @@ downloadBtn?.addEventListener("click", async () => {
           }
         }
 
-        doc.save(`Rapport_Audit_Revey_${dateStr.replace(/\//g, "-")}.pdf`);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const fileName = `Rapport_Audit_Revey_${atelier.replace(/\s/g, "_")}_${audit.replace(/\s/g, "_")}_${zone.replace(/\s/g, "_")}_${timestamp}.pdf`;
+
+        const pdfBlob = doc.output('blob');
+        doc.save(fileName);
+
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from('reports')
+            .upload(fileName, pdfBlob, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType: 'application/pdf'
+            });
+
+          if (uploadError) {
+            console.error("Erreur lors de l'upload du rapport:", uploadError);
+            alert("Le rapport a été téléchargé localement mais n'a pas pu être sauvegardé sur le serveur.");
+          } else {
+            const { error: metadataError } = await supabase
+              .from('audit_reports')
+              .insert({
+                user_id: userId,
+                audit_name: `${atelier} — ${audit}`,
+                filename: fileName,
+                file_path: fileName,
+                generated_at: new Date().toISOString(),
+                score: globalScore,
+                period: getCurrentAuditPeriod(audit)
+              });
+
+            if (metadataError) {
+              console.error("Erreur lors de l'enregistrement des métadonnées:", metadataError);
+            }
+          }
+        } catch (uploadErr) {
+          console.error("Erreur upload:", uploadErr);
+          alert("Le rapport a été téléchargé localement mais l'upload vers le serveur a échoué.");
+        }
       } catch (err) {
         console.error(err);
         alert("Erreur PDF: " + err.message);

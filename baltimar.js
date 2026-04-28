@@ -63,7 +63,59 @@ const rubriqueContainer = document.getElementById("rubrique-container");
 const rubriquesList = document.getElementById("rubriques-list");
 const downloadBtn = document.getElementById("downloadPdf");
 const downloadScoreBtn = document.getElementById("downloadScoreBtn");
+const filterIncompleteBtn = document.getElementById("filterIncompleteBtn");
 const username = localStorage.getItem("username") || "";
+
+let filterActive = false;
+
+function applyFilter() {
+  const headers = rubriquesList.querySelectorAll(".rubrique-header");
+  headers.forEach(header => {
+    const wrapper = header.nextElementSibling;
+    if (!wrapper) return;
+
+    // Always keep "Autres" (textarea) section visible
+    if (wrapper.querySelector("textarea")) {
+      header.style.display = "";
+      wrapper.style.display = "";
+      return;
+    }
+
+    const rows = Array.from(wrapper.querySelectorAll("tbody tr"));
+    const questionRows = rows.filter(tr => !tr.querySelector("td[colspan]"));
+    const incompleteRows = questionRows.filter(tr => !tr.classList.contains("row-complete"));
+
+    rows.forEach(tr => {
+      const isSubheader = !!tr.querySelector("td[colspan]");
+      if (filterActive && !isSubheader && tr.classList.contains("row-complete")) {
+        tr.style.display = "none";
+      } else {
+        tr.style.display = "";
+      }
+    });
+
+    if (filterActive) {
+      if (incompleteRows.length === 0) {
+        header.style.display = "none";
+        wrapper.style.display = "none";
+      } else {
+        header.style.display = "";
+        wrapper.style.display = "";
+        wrapper.classList.remove("hidden");
+      }
+    } else {
+      header.style.display = "";
+      wrapper.style.display = "";
+    }
+  });
+}
+
+filterIncompleteBtn?.addEventListener("click", () => {
+  filterActive = !filterActive;
+  filterIncompleteBtn.textContent = filterActive ? "Afficher tout" : "Afficher non complétées";
+  filterIncompleteBtn.classList.toggle("active", filterActive);
+  applyFilter();
+});
 /* ===================== DEVICE DETECTION ===================== */
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -198,6 +250,9 @@ function hideAllBelowAudit() {
   rubriqueContainer.classList.add("hidden");
   if (downloadBtn) downloadBtn.classList.add("hidden");
   if (downloadScoreBtn) downloadScoreBtn.classList.add("hidden");
+  filterActive = false;
+  filterIncompleteBtn?.classList.add("hidden");
+  filterIncompleteBtn?.classList.remove("active");
 
   resetSelect(zoneSelect);
   resetSelect(souszoneSelect);
@@ -1059,6 +1114,11 @@ function showRubriques(rubriquesObj, existingAnswers = []) {
   rubriqueContainer.classList.remove("hidden");
   if (downloadBtn) downloadBtn.classList.remove("hidden");
   if (downloadScoreBtn) downloadScoreBtn.classList.remove("hidden");
+  filterActive = false;
+  if (filterIncompleteBtn) {
+    filterIncompleteBtn.classList.remove("hidden", "active");
+    filterIncompleteBtn.textContent = "Afficher non complétées";
+  }
 }
 
 /* ===================== PDF: IMAGE COMPRESS ===================== */
@@ -1111,7 +1171,7 @@ downloadBtn?.addEventListener("click", async () => {
     
     // Générer un nom de fichier unique
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const fileName = `Rapport_Audit_Baltimar_${audit.replace(/\s/g, "_")}_${timestamp}.pdf`;
+    const fileName = `Rapport_Audit_Baltimar_${audit.replace(/\s/g, "_")}_${timestamp}_${zone.replace(/\s/g, "_")}.pdf`;
 
     // Couleurs
     const colorSlate = [30, 41, 59]; 
@@ -1520,7 +1580,7 @@ downloadBtn?.addEventListener("click", async () => {
         try {
           const { error: uploadError } = await supabase.storage
             .from('reports')
-            .upload(`${userId}/${audit.replace(/\s/g, "_")}/${fileName}`, pdfBlob, {
+            .upload(fileName, pdfBlob, {
               cacheControl: '3600',
               upsert: true,
               contentType: 'application/pdf'
@@ -1539,7 +1599,7 @@ downloadBtn?.addEventListener("click", async () => {
                 user_id: userId,
                 audit_name: audit,
                 filename: fileName,
-                file_path: `${userId}/${audit.replace(/\s/g, "_")}/${fileName}`,
+                file_path: fileName,
                 generated_at: new Date().toISOString(),
                 score: globalScore,
                 period: getCurrentAuditPeriod(audit)

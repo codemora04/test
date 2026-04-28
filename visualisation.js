@@ -450,42 +450,116 @@ document.addEventListener("click", e => {
 
 /* ===================== DOWNLOAD HISTORY ===================== */
 
-async function loadDownloadHistory() {
+let allHistoryFiles = [];
+
+function parseReportMeta(filename) {
+    // Baltimar PDF: Rapport_Audit_Baltimar_<AUDIT>_<TIMESTAMP>_<ZONE>.pdf
+    const bMatch = filename.match(/^Rapport_Audit_Baltimar_(.+?)_(\d{4}-\d{2}-\d{2}T[\d-]+Z)_(.+?)\.pdf$/i);
+    if (bMatch) {
+        return {
+            company: "baltimar",
+            audit: bMatch[1].replace(/_/g, " "),
+            zone: bMatch[3].replace(/_/g, " "),
+        };
+    }
+
+    // Revey PDF: Rapport_Audit_Revey_<ATELIER_AUDIT>_<TIMESTAMP>.pdf
+    const rMatch = filename.match(/^Rapport_Audit_Revey_(.+?)_(\d{4}-\d{2}-\d{2}T[\d-]+Z)\.pdf$/i);
+    if (rMatch) {
+        return {
+            company: "revey",
+            audit: rMatch[1].replace(/_/g, " "),
+            zone: null,
+        };
+    }
+
+    // Generic (charts, etc.)
+    const lc = filename.toLowerCase();
+    return {
+        company: lc.includes("baltimar") ? "baltimar" : lc.includes("revey") ? "revey" : null,
+        audit: null,
+        zone: null,
+    };
+}
+
+function populateHistoryFilters(subset) {
+    const auditEl = document.getElementById("histFilterAudit");
+    const zoneEl  = document.getElementById("histFilterZone");
+    if (!auditEl || !zoneEl) return;
+
+    const audits = new Set();
+    const zones  = new Set();
+    subset.forEach(({ meta }) => {
+        if (meta.audit) audits.add(meta.audit);
+        if (meta.zone)  zones.add(meta.zone);
+    });
+
+    const curAudit = auditEl.value;
+    const curZone  = zoneEl.value;
+
+    auditEl.innerHTML = `<option value="">Tous</option>`;
+    Array.from(audits).sort().forEach(a => {
+        const opt = document.createElement("option");
+        opt.value = a.toLowerCase();
+        opt.textContent = a;
+        auditEl.appendChild(opt);
+    });
+
+    zoneEl.innerHTML = `<option value="">Toutes</option>`;
+    Array.from(zones).sort().forEach(z => {
+        const opt = document.createElement("option");
+        opt.value = z.toLowerCase();
+        opt.textContent = z;
+        zoneEl.appendChild(opt);
+    });
+
+    if (curAudit) auditEl.value = curAudit;
+    if (curZone)  zoneEl.value  = curZone;
+}
+
+function renderHistoryList(files) {
     const historyList = document.getElementById("downloadHistoryList");
     if (!historyList) return;
 
-    const { data, error } = await supabase.storage
-        .from("reports")
-        .list("", { limit: 20, sortBy: { column: "created_at", order: "desc" } });
-
-    if (error) {
-        console.error("Erreur chargement rapports:", error);
-        historyList.innerHTML = `<p style="color:#f87171;text-align:center;font-size:0.85rem;padding:16px;">Erreur : ${error.message}</p>`;
-        return;
-    }
-
-    const files = (data || []).filter(f => f.name && f.name !== ".emptyFolderPlaceholder");
-
     if (!files.length) {
-        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;padding:16px;">Aucun rapport d'audit enregistré.</p>`;
+        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;padding:16px;">Aucun rapport correspondant aux filtres.</p>`;
         return;
     }
 
-    historyList.innerHTML = files.map(file => {
+    historyList.innerHTML = files.map(({ file, meta }) => {
         const { data: urlData } = supabase.storage.from("reports").getPublicUrl(file.name);
         const date = new Date(file.created_at).toLocaleString("fr-FR", {
             day: "2-digit", month: "short", year: "numeric",
             hour: "2-digit", minute: "2-digit"
         });
         const title = file.name.replace(/^\d+_/, "").replace(/[-_]/g, " ").replace(/\.\w+$/, "");
+
+        const companyBadge = meta.company
+            ? `<span style="font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:20px;
+                            background:${meta.company === "baltimar" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)"};
+                            color:${meta.company === "baltimar" ? "#059669" : "#dc2626"};margin-left:6px;">
+                ${meta.company === "baltimar" ? "Baltimar" : "Revey"}
+               </span>`
+            : "";
+
+        const zoneBadge = meta.zone
+            ? `<span style="font-size:0.7rem;padding:2px 7px;border-radius:20px;
+                            background:rgba(99,102,241,0.1);color:#4f46e5;margin-left:4px;">
+                ${meta.zone}
+               </span>`
+            : "";
+
         return `
         <div style="display:flex;justify-content:space-between;align-items:center;
                     padding:10px 14px;border-bottom:1px solid var(--surface-border);">
-            <div style="min-width:0;">
-                <span style="display:block;color:var(--text-main);font-size:0.85rem;
-                             white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                    📄 ${title}
-                </span>
+            <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:2px;">
+                    <span style="color:var(--text-main);font-size:0.85rem;
+                                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        📄 ${title}
+                    </span>
+                    ${companyBadge}${zoneBadge}
+                </div>
                 <span style="display:block;color:#94a3b8;font-size:0.78rem;">${date}</span>
             </div>
             <a href="${urlData.publicUrl}" target="_blank" rel="noopener"
@@ -496,6 +570,67 @@ async function loadDownloadHistory() {
             </a>
         </div>`;
     }).join("");
+}
+
+function applyHistoryFilters() {
+    const companyVal = (document.getElementById("histFilterCompany")?.value || "").toLowerCase();
+    const auditVal   = (document.getElementById("histFilterAudit")?.value   || "").toLowerCase();
+    const zoneVal    = (document.getElementById("histFilterZone")?.value    || "").toLowerCase();
+
+    const filtered = allHistoryFiles.filter(({ meta }) => {
+        if (companyVal && meta.company !== companyVal) return false;
+        if (auditVal   && (!meta.audit || meta.audit.toLowerCase() !== auditVal)) return false;
+        if (zoneVal    && (!meta.zone  || meta.zone.toLowerCase()  !== zoneVal))  return false;
+        return true;
+    });
+
+    renderHistoryList(filtered);
+}
+
+async function loadDownloadHistory() {
+    const historyList = document.getElementById("downloadHistoryList");
+    if (!historyList) return;
+
+    const { data, error } = await supabase.storage
+        .from("reports")
+        .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+
+    if (error) {
+        console.error("Erreur chargement rapports:", error);
+        historyList.innerHTML = `<p style="color:#f87171;text-align:center;font-size:0.85rem;padding:16px;">Erreur : ${error.message}</p>`;
+        return;
+    }
+
+    const files = (data || []).filter(f => f.name && f.name !== ".emptyFolderPlaceholder" && f.metadata);
+
+    if (!files.length) {
+        historyList.innerHTML = `<p style="color:#94a3b8;text-align:center;font-size:0.85rem;padding:16px;">Aucun rapport d'audit enregistré.</p>`;
+        return;
+    }
+
+    allHistoryFiles = files.map(file => ({ file, meta: parseReportMeta(file.name) }));
+    populateHistoryFilters(allHistoryFiles);
+    applyHistoryFilters();
+
+    // Wire up filter listeners once
+    const companyEl = document.getElementById("histFilterCompany");
+    const auditEl   = document.getElementById("histFilterAudit");
+    const zoneEl    = document.getElementById("histFilterZone");
+
+    [companyEl, auditEl, zoneEl].forEach(el => {
+        if (el && !el.dataset.listenerAttached) {
+            el.addEventListener("change", () => {
+                // When company changes, repopulate audit/zone with only matching options
+                if (el === companyEl) {
+                    const cv = el.value.toLowerCase();
+                    const subset = cv ? allHistoryFiles.filter(({ meta }) => meta.company === cv) : allHistoryFiles;
+                    populateHistoryFilters(subset);
+                }
+                applyHistoryFilters();
+            });
+            el.dataset.listenerAttached = "1";
+        }
+    });
 }
 
 /* ===================== DOWNLOAD CHART ===================== */

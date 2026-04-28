@@ -1715,3 +1715,29 @@ input[type="date"].nc-input {
   width: 100%;
   max-width: 350px;
 }
+
+/* ============ FILTER BUTTON ============ */
+.btn-filter {
+  margin-top: 12px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  font-size: 0.88rem;
+  padding: 9px 20px;
+  box-shadow: var(--shadow-md), 0 0 16px rgba(245, 158, 11, 0.18);
+}
+
+.btn-filter:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 28px rgba(245, 158, 11, 0.3);
+}
+
+.btn-filter.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: var(--shadow-md), 0 0 16px rgba(59, 130, 246, 0.22);
+}
+
+.btn-filter.active:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: var(--shadow-lg), 0 0 28px rgba(59, 130, 246, 0.35);
+}

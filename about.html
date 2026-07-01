@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr" data-page-key="page.about">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/jpeg" href="../images/logo3.jpg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>À Propos — Baltimar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/theme.js"></script>
+</head>
+<body>
+
+  <!-- ── Navbar ──────────────────────────────────────────────── -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="index.html" class="navbar__logo" aria-label="Baltimar">
+          <img src="../images/logo3.jpg" alt="Baltimar" />
+        </a>
+        <div class="navbar__links">
+          <a href="index.html" data-i18n="nav.home">Accueil</a>
+          <a href="about.html" data-i18n="nav.about">À Propos</a>
+          <a href="products.html" data-i18n="nav.products">Produits</a>
+          <button class="theme-toggle" aria-label="Basculer le thème" onclick="toggleTheme()">
+            <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+            <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+          </button>
+          <div class="lang-switcher">
+            <button class="lang-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false">
+              <span id="lang-current">FR</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown" role="listbox">
+              <button class="lang-option" data-lang="fr" role="option">FR — Français</button>
+              <button class="lang-option" data-lang="en" role="option">EN — English</button>
+              <button class="lang-option" data-lang="ar" role="option">AR — عربية</button>
+            </div>
+          </div>
+          <a href="index.html#contact" class="btn btn--primary navbar__cta" style="padding: 0.6rem 1.25rem" data-i18n="nav.contact">Nous Contacter</a>
+        </div>
+        <div class="navbar__actions">
+          <button class="theme-toggle" aria-label="Basculer le thème" onclick="toggleTheme()">
+            <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+            <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+          </button>
+          <button class="navbar__hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="navbar__mobile" id="mobile-menu">
+      <div class="navbar__mobile-inner">
+        <a href="index.html" data-i18n="nav.home">Accueil</a>
+        <a href="about.html" data-i18n="nav.about">À Propos</a>
+        <a href="products.html" data-i18n="nav.products">Produits</a>
+        <a href="index.html#contact" class="btn btn--primary" style="width: fit-content" data-i18n="nav.contact">Nous Contacter</a>
+        <div class="lang-switcher-mobile">
+          <button class="lang-option" data-lang="fr">FR</button>
+          <button class="lang-option" data-lang="en">EN</button>
+          <button class="lang-option" data-lang="ar">AR</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ── Page Hero ───────────────────────────────────────── -->
+    <section class="products-page-hero">
+      <div class="products__bg-blobs">
+        <div class="products__blob products__blob--1"></div>
+        <div class="products__blob products__blob--2"></div>
+        <div class="products__blob products__blob--3"></div>
+      </div>
+      <div class="container">
+        <nav class="breadcrumb reveal" aria-label="Fil d'Ariane">
+          <a href="index.html" data-i18n="nav.home">Accueil</a>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          <span data-i18n="about.breadcrumb">À Propos</span>
+        </nav>
+        <div class="products__header reveal">
+          <span class="badge badge--dark">
+            <span class="badge-dot"></span><span data-i18n="about.badge">À Propos de Baltimar</span>
+          </span>
+          <h1 class="products__title" data-i18n-html="about.title">Un partenaire de confiance <span class="products__title-gradient"> depuis plus de 30 ans</span></h1>
+          <p class="products__sub" data-i18n="about.sub">Baltimar accompagne l'industrie alimentaire.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── About Main ───────────────────────────────────────── -->
+    <section id="about">
+      <div class="about__blob about__blob--tr"></div>
+      <div class="about__blob about__blob--bl"></div>
+      <div class="about__blob about__blob--c"></div>
+      <div class="container">
+        <div class="about__inner">
+
+          <!-- Two-column: Activité + Qualité -->
+          <div class="about__two-col">
+
+            <!-- Activité -->
+            <div class="glass-card reveal">
+              <div class="glass-card__blob glass-card__blob--tr"></div>
+              <div class="glass-card__blob glass-card__blob--bl"></div>
+              <div class="glass-card__inner">
+                <span class="badge badge--dark" style="margin-bottom: 1.25rem">
+                  <span class="badge-dot"></span><span data-i18n="about.act.badge">Notre Activité</span>
+                </span>
+                <h3 class="about__card-title" data-i18n-html="about.act.title">Expertise marocaine en huiles<br>et graisses végétales</h3>
+                <p class="about__card-text" data-i18n="about.act.p1">Baltimar est un fabricant marocain...</p>
+                <p class="about__card-text" data-i18n="about.act.p2">Nous sommes spécialisés dans la production...</p>
+                <p class="about__card-text" data-i18n="about.act.p3">Nous sommes un fournisseur majeur...</p>
+              </div>
+            </div>
+
+            <!-- Qualité -->
+            <div class="glass-card reveal reveal-delay-1">
+              <div class="glass-card__blob glass-card__blob--tr"></div>
+              <div class="glass-card__blob glass-card__blob--bl"></div>
+              <div class="glass-card__inner">
+                <span class="badge badge--dark" style="margin-bottom: 1.25rem">
+                  <span class="badge-dot"></span><span data-i18n="about.qual.badge">Qualité & Sécurité Alimentaire</span>
+                </span>
+                <h3 class="about__card-title" data-i18n-html="about.qual.title">Un système de contrôle<br>performant et certifié</h3>
+                <p class="about__card-text" style="margin-bottom: 1.25rem" data-i18n="about.qual.p1">Des équipes travaillant en rotation...</p>
+                <div class="lab-grid">
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.rmn.name">RMN</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.rmn.desc">Résonance Magnétique Nucléaire...</p>
+                  </div>
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.cpg.name">CPG</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.cpg.desc">Chromatographie en phase gazeuse...</p>
+                  </div>
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.spec.name">Spectrophotomètre</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.spec.desc">Contrôle précis...</p>
+                  </div>
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.col.name">Colorimètre Lovibond</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.col.desc">Évaluation de la couleur...</p>
+                  </div>
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.phys.name">Physico-chimiques</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.phys.desc">Équipements dédiés...</p>
+                  </div>
+                  <div class="lab-item">
+                    <p class="lab-item__name" data-i18n="about.lab.orga.name">Tests organoleptiques</p>
+                    <p class="lab-item__desc" data-i18n="about.lab.orga.desc">Dispositifs de contrôle sensoriel...</p>
+                  </div>
+                </div>
+                <p class="about__card-text" style="margin-bottom: 1rem" data-i18n="about.qual.p2">La capacité de production de Baltimar...</p>
+                <div class="cert-badges">
+                  <span class="cert-badge" data-i18n="cert.2">Certification ONSSA</span>
+                  <span class="cert-badge" data-i18n="cert.1">FSSC 22000 V6</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mission / Vision / Valeurs -->
+          <div class="glass-card reveal">
+            <div class="glass-card__blob glass-card__blob--tr"></div>
+            <div class="glass-card__blob glass-card__blob--bl"></div>
+            <div class="glass-card__inner">
+              <span class="badge badge--dark" style="margin-bottom: 1.5rem">
+                <span class="badge-dot"></span><span data-i18n="about.mvv.badge">Mission, Vision & Valeurs</span>
+              </span>
+              <div class="mvv-grid">
+                <div class="mvv-card">
+                  <div class="mvv-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  </div>
+                  <h4 class="mvv-title" data-i18n="about.mission.title">Notre Mission</h4>
+                  <p class="mvv-desc" data-i18n="about.mission.desc">Fournir à l'industrie agroalimentaire...</p>
+                </div>
+                <div class="mvv-card mvv-card--accent">
+                  <div class="mvv-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </div>
+                  <h4 class="mvv-title" data-i18n="about.vision.title">Notre Vision</h4>
+                  <p class="mvv-desc" data-i18n="about.vision.desc">Devenir la référence incontournable...</p>
+                </div>
+                <div class="mvv-card">
+                  <div class="mvv-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </div>
+                  <h4 class="mvv-title" data-i18n="about.values.title">Nos Valeurs</h4>
+                  <ul class="mvv-list">
+                    <li data-i18n="about.v1">Qualité sans compromis</li>
+                    <li data-i18n="about.v2">Innovation permanente</li>
+                    <li data-i18n="about.v3">Partenariat durable</li>
+                    <li data-i18n="about.v4">Excellence opérationnelle</li>
+                    <li data-i18n="about.v5">Intégrité & transparence</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capability -->
+          <div class="glass-card reveal">
+            <div class="glass-card__blob glass-card__blob--tr"></div>
+            <div class="glass-card__blob glass-card__blob--bl"></div>
+            <div class="glass-card__inner">
+              <span class="badge badge--dark" style="margin-bottom: 1.25rem">
+                <span class="badge-dot"></span><span data-i18n="about.cap.badge">Notre Capabilité</span>
+              </span>
+              <div class="about__cap-grid">
+                <div>
+                  <h3 class="about__card-title" data-i18n="about.cap.title">Une plateforme industrielle intégrée</h3>
+                  <p class="about__card-text" data-i18n-html="about.cap.text">Baltimar emploie plus de <strong style="color:var(--brand)">130 collaborateurs dédiés</strong>...</p>
+                  <div class="about__mini-stats">
+                    <div><p class="mini-stat__value">130+</p><p class="mini-stat__label" data-i18n="about.cap.l1">Collaborateurs</p></div>
+                    <div><p class="mini-stat__value">4</p><p class="mini-stat__label" data-i18n="about.cap.l2">Lignes de production</p></div>
+                    <div><p class="mini-stat__value">30+</p><p class="mini-stat__label" data-i18n="about.cap.l3">Ans d'expertise</p></div>
+                  </div>
+                </div>
+                <ul class="check-list">
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-11 11-5-5" /></svg></span>
+                    <p class="check-text" data-i18n="about.cap.c1">Des lignes complètes de raffinage...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-11 11-5-5" /></svg></span>
+                    <p class="check-text" data-i18n="about.cap.c2">Une ligne d'hydrogénation...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-11 11-5-5" /></svg></span>
+                    <p class="check-text" data-i18n="about.cap.c3">Des lignes de cristallisation...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-11 11-5-5" /></svg></span>
+                    <p class="check-text" data-i18n="about.cap.c4">Une ligne moderne de shortening...</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Development objective -->
+          <div class="glass-card reveal">
+            <div class="glass-card__blob glass-card__blob--tr"></div>
+            <div class="glass-card__blob glass-card__blob--bl"></div>
+            <div class="glass-card__inner">
+              <span class="badge badge--dark" style="margin-bottom: 1.25rem">
+                <span class="badge-dot"></span><span data-i18n="about.dev.badge">Notre Objectif de Développement</span>
+              </span>
+              <div class="about__cap-grid">
+                <div>
+                  <h3 class="about__card-title" data-i18n-html="about.dev.title">Votre application, <span class="about__title-gradient"> notre priorité.</span></h3>
+                  <p class="about__card-text" data-i18n-html="about.dev.text">Pour le développement de graisses spéciales...</p>
+                </div>
+                <ul class="check-list">
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 3" /></svg></span>
+                    <p class="check-text" data-i18n="about.dev.c1">Nous appliquons le principe du « fit for purpose »...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 3" /></svg></span>
+                    <p class="check-text" data-i18n="about.dev.c2">Dans notre laboratoire...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 3" /></svg></span>
+                    <p class="check-text" data-i18n="about.dev.c3">Nous échangeons avec vous directement...</p>
+                  </li>
+                  <li class="check-item">
+                    <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 3" /></svg></span>
+                    <p class="check-text" data-i18n="about.dev.c4">Les compétences et capacités...</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="about__stats reveal">
+            <div class="about__stat">
+              <div class="about__stat-value">30+</div>
+              <div class="about__stat-label" data-i18n="about.stat1">Ans d'expérience</div>
+            </div>
+            <div class="about__stat">
+              <div class="about__stat-value">100+</div>
+              <div class="about__stat-label" data-i18n="about.stat2">Clients partenaires</div>
+            </div>
+            <div class="about__stat">
+              <div class="about__stat-value">7+</div>
+              <div class="about__stat-label" data-i18n="about.stat3">Matières premières</div>
+            </div>
+            <div class="about__stat">
+              <div class="about__stat-value">100%</div>
+              <div class="about__stat-label" data-i18n="about.stat4">Engagement qualité</div>
+            </div>
+          </div>
+
+          <!-- Pillars -->
+          <div class="about__pillars reveal">
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <h4 class="pillar-title" data-i18n="about.p1.title">Qualité Certifiée</h4>
+              <p class="pillar-desc" data-i18n="about.p1.desc">Nos produits répondent aux normes internationales les plus strictes.</p>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6" /><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+                </svg>
+              </div>
+              <h4 class="pillar-title" data-i18n="about.p2.title">Excellence Technique</h4>
+              <p class="pillar-desc" data-i18n="about.p2.desc">Plus de 30 ans de maîtrise dans le secteur.</p>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18h6M12 2v1M12 21v1M4.22 4.22l.71.71M19.07 4.22l-.71.71M1 12h1M22 12h1M4.22 19.78l.71-.71M19.07 19.78l-.71-.71M12 6a6 6 0 010 12 6 6 0 010-12z" />
+                </svg>
+              </div>
+              <h4 class="pillar-title" data-i18n="about.p3.title">Innovation & Technologie</h4>
+              <p class="pillar-desc" data-i18n="about.p3.desc">Des procédés modernes et des solutions performantes.</p>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                </svg>
+              </div>
+              <h4 class="pillar-title" data-i18n="about.p4.title">Partenariat Durable</h4>
+              <p class="pillar-desc" data-i18n="about.p4.desc">Relations de confiance bâties sur la qualité.</p>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="about__cta reveal">
+            <a href="products.html" class="link-arrow">
+              <span data-i18n="about.cta">Découvrir nos produits</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer (same as index.html) ─────────────────────── -->
+  <footer>
+    <div class="footer__banner-wrap">
+      <div class="container">
+        <div class="footer__banner">
+          <div>
+            <h3 class="footer__banner-title" data-i18n="footer.banner.title">Prêt à développer votre prochain produit ?</h3>
+            <p class="footer__banner-sub" data-i18n="footer.banner.sub">Collaborons pour créer la solution lipidique idéale.</p>
+          </div>
+          <a href="index.html#contact" class="btn btn--light" data-i18n="footer.banner.btn">Nous Contacter</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__main">
+      <div class="container">
+        <div class="footer__grid">
+          <div>
+            <a href="index.html" class="footer__logo" aria-label="Baltimar"><img src="../images/logo3.jpg" alt="Baltimar" /></a>
+            <p class="footer__about" data-i18n="footer.about">Fabricant marocain d'huiles et graisses végétales.</p>
+            <div class="footer__socials">
+              <a href="#" class="footer__social" aria-label="Site web"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg></a>
+              <a href="#" class="footer__social" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
+            </div>
+          </div>
+          <div>
+            <h4 class="footer__col-title" data-i18n="footer.nav">Navigation</h4>
+            <ul class="footer__col-list">
+              <li><a href="index.html" data-i18n="nav.home">Accueil</a></li>
+              <li><a href="about.html" data-i18n="nav.about">À Propos</a></li>
+              <li><a href="products.html" data-i18n="nav.products">Produits</a></li>
+              <li><a href="index.html#contact" data-i18n="footer.contact">Contact</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="footer__col-title" data-i18n="footer.apps">Applications</h4>
+            <ul class="footer__col-list">
+              <li><a href="application.html?key=boulangerie" data-i18n="footer.app.boul">Boulangerie</a></li>
+              <li><a href="application.html?key=confiserie" data-i18n="footer.app.conf">Confiserie / Biscuiterie</a></li>
+              <li><a href="application.html?key=laitier" data-i18n="footer.app.lait">Alternatives Laitières</a></li>
+              <li><a href="application.html?key=friture" data-i18n="footer.app.frit">Friture</a></li>
+              <li><a href="application.html?key=conserveries" data-i18n="footer.app.cons">Conserveries</a></li>
+              <li><a href="application.html?key=nonalimentaire" data-i18n="footer.app.noal">Non Alimentaires</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="footer__col-title" data-i18n="footer.contact">Contact</h4>
+            <ul class="footer__contact-list">
+              <li class="footer__contact-item">
+                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg></div>
+                <span class="footer__contact-text">Z.I Sahel-Had Soualem (Route Casa El Jadida) B.P 99 — Morocco</span>
+              </li>
+              <li class="footer__contact-item">
+                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg></div>
+                <span class="footer__contact-text">+212 5XX XX XX XX</span>
+              </li>
+              <li class="footer__contact-item">
+                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg></div>
+                <span class="footer__contact-text">contact@baltimar.ma</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="footer__bottom">
+        <p class="footer__copy" data-i18n="footer.copy">© 2026 Baltimar. Tous droits réservés.</p>
+        <div class="footer__legal">
+          <a href="#" data-i18n="footer.privacy">Politique de confidentialité</a>
+          <a href="#" data-i18n="footer.legal">Mentions légales</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/scroll-reveal.js"></script>
+  <script src="js/navbar.js"></script>
+</body>
+</html>

@@ -95,7 +95,7 @@ if (form) {
     if (SUPABASE_URL === 'your_supabase_project_url') {
       const subject = encodeURIComponent(`[Baltimar] ${data.subject || 'Nouveau message'} - ${data.name}`)
       const body = encodeURIComponent(`Nom: ${data.name}\nEmail: ${data.email}\n\n${data.message}`)
-      window.location.href = `mailto:khadeyene2580@gmail.com?subject=${subject}&body=${body}`
+      window.location.href = `mailto:YMansouri@baltimar.co.ma?subject=${subject}&body=${body}`
       form.style.display = 'none'
       successDiv.classList.add('visible')
       return

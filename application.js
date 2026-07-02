@@ -222,7 +222,7 @@ if (!data) {
       <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;font-family:Outfit,sans-serif;text-align:center;padding:2rem;">
         <h1 style="font-size:2rem;font-weight:700;">Application introuvable</h1>
         <p style="color:#666;">La page que vous cherchez n'existe pas.</p>
-        <a href="products.html#applications" style="background:oklch(38% 0.12 160);color:#fff;padding:0.85rem 1.75rem;border-radius:999px;font-weight:600;text-decoration:none;">
+        <a href="products.html#applications" style="background:var(--brand);color:#fff;padding:0.85rem 1.75rem;border-radius:999px;font-weight:600;text-decoration:none;">
           Retour aux applications
         </a>
       </div>`

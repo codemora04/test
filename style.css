@@ -1911,105 +1911,99 @@ footer {
 }
 
 /* ============================================================
-   APPLICATIONS SHOWCASE GRID
+   APP CATEGORY CARD GRID  (products page)
    ============================================================ */
-.app-showcase {
-  padding: 4rem 0 5rem;
-  background: #fff;
-}
-
-.app-showcase__grid {
+.app-cat-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-}
-@media (max-width: 900px) {
-  .app-showcase__grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 560px) {
-  .app-showcase__grid { grid-template-columns: 1fr; }
+  padding-bottom: 3rem;
 }
 
-.app-showcase-card {
-  border-radius: var(--radius);
+@media (max-width: 900px) {
+  .app-cat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .app-cat-grid { grid-template-columns: 1fr; }
+}
+
+.app-cat-card {
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 20px oklch(0% 0 0 / 0.07);
   display: flex;
   flex-direction: column;
-  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
   text-decoration: none;
-}
-.app-showcase-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 48px oklch(0% 0 0 / 0.13);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s;
 }
 
-.app-showcase-card__img-wrap {
+.app-cat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.app-cat-card__img-wrap {
+  width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  flex-shrink: 0;
 }
-.app-showcase-card__img {
+
+.app-cat-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s var(--ease-out);
-}
-.app-showcase-card:hover .app-showcase-card__img {
-  transform: scale(1.06);
+  transition: transform 0.45s var(--ease-out);
+  display: block;
 }
 
-.app-showcase-card__info {
-  padding: 1.5rem 1.75rem;
+.app-cat-card:hover .app-cat-card__img {
+  transform: scale(1.05);
+}
+
+.app-cat-card__body {
+  padding: 1.25rem 1.5rem 1.5rem;
   background: var(--brand-light);
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
-.app-showcase-card__title {
-  font-size: 1.1rem;
+
+.app-cat-card__title {
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--brand-dark);
-  line-height: 1.35;
+  line-height: 1.3;
 }
-.app-showcase-card__cta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+
+.app-cat-card__divider {
+  border: none;
+  border-top: 1px solid var(--brand-border);
+  margin: 0;
+}
+
+.app-cat-card__link {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--brand);
-  padding-top: 0.875rem;
-  border-top: 1.5px solid var(--brand-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   transition: gap 0.2s var(--ease-out);
 }
-.app-showcase-card:hover .app-showcase-card__cta {
-  gap: 0.85rem;
-}
-.app-showcase-card__cta svg {
+
+.app-cat-card__link svg {
   transition: transform 0.2s var(--ease-spring);
   flex-shrink: 0;
 }
-.app-showcase-card:hover .app-showcase-card__cta svg {
-  transform: translateX(4px);
+
+.app-cat-card:hover .app-cat-card__link {
+  gap: 0.7rem;
 }
 
-/* Lock colors — prevent browser link hover/visited/active from changing anything */
-.app-showcase-card:hover .app-showcase-card__info,
-.app-showcase-card:active .app-showcase-card__info,
-.app-showcase-card:visited .app-showcase-card__info {
-  background: var(--brand-light);
-}
-.app-showcase-card:hover .app-showcase-card__title,
-.app-showcase-card:active .app-showcase-card__title,
-.app-showcase-card:visited .app-showcase-card__title {
-  color: var(--brand-dark);
-}
-.app-showcase-card:hover .app-showcase-card__cta,
-.app-showcase-card:active .app-showcase-card__cta,
-.app-showcase-card:visited .app-showcase-card__cta {
-  color: var(--brand);
+.app-cat-card:hover .app-cat-card__link svg {
+  transform: translateX(3px);
 }
 
 /* ============================================================
@@ -2019,12 +2013,6 @@ footer {
   padding: clamp(8rem, 15vw, 11rem) 0 7rem;
   background: var(--surface-2);
   position: relative;
-}
-.catalogue-section--header-only {
-  padding-bottom: 0;
-}
-.catalogue-section--catalogue-only {
-  padding-top: 4rem;
 }
 
 .catalogue__header {
@@ -2048,9 +2036,7 @@ footer {
 }
 
 .catalogue-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  /* inner .app-cat-grid controls its own layout */
 }
 
 /* ── Groupe utilisation (accordion) ────────────────────────── */

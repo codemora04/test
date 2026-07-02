@@ -1,165 +1,281 @@
 <!DOCTYPE html>
-<html lang="fr" data-page-key="page.app">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/jpeg" href="../images/logo3.jpg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Application — Baltimar</title>
+  <title data-i18n="page.app">Application — Baltimar</title>
+  <meta name="description" content="Découvrez les avantages et les produits Baltimar pour chaque application industrielle." />
+  <link rel="icon" type="image/jpeg" href="images/logo3.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <script src="theme.js"></script>
+  <script src="i18n.js"></script>
 </head>
 <body>
 
-  <!-- ── Navbar ──────────────────────────────────────────────── -->
-  <nav class="navbar" id="navbar">
-    <div class="container">
-      <div class="navbar__inner">
-        <a href="index.html" class="navbar__logo" aria-label="Baltimar">
-          <img src="../images/logo3.jpg" alt="Baltimar" />
-        </a>
-        <div class="navbar__links">
-          <a href="index.html" data-i18n="nav.home">Accueil</a>
-          <a href="about.html" data-i18n="nav.about">À Propos</a>
-          <a href="products.html" data-i18n="nav.products">Produits</a>
-          <button class="theme-toggle" aria-label="Basculer le thème" onclick="toggleTheme()">
-            <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-            <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-          </button>
-          <div class="lang-switcher">
-            <button class="lang-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false">
-              <span id="lang-current">FR</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-            </button>
-            <div class="lang-dropdown" id="lang-dropdown" role="listbox">
-              <button class="lang-option" data-lang="fr" role="option">FR — Français</button>
-              <button class="lang-option" data-lang="en" role="option">EN — English</button>
-              <button class="lang-option" data-lang="ar" role="option">AR — عربية</button>
-            </div>
-          </div>
-          <a href="index.html#contact" class="btn btn--primary navbar__cta" style="padding: 0.6rem 1.25rem" data-i18n="nav.contact">Nous Contacter</a>
-        </div>
-        <div class="navbar__actions">
-          <button class="theme-toggle" aria-label="Basculer le thème" onclick="toggleTheme()">
-            <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-            <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-          </button>
-          <button class="navbar__hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="navbar__mobile" id="mobile-menu">
-      <div class="navbar__mobile-inner">
+<!-- ════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo" aria-label="Baltimar">
+        <img src="images/logo3.jpg" alt="Baltimar" />
+      </a>
+      <div class="navbar__links">
         <a href="index.html" data-i18n="nav.home">Accueil</a>
         <a href="about.html" data-i18n="nav.about">À Propos</a>
-        <a href="products.html" data-i18n="nav.products">Produits</a>
-        <a href="index.html#contact" class="btn btn--primary" style="width: fit-content" data-i18n="nav.contact">Nous Contacter</a>
-        <div class="lang-switcher-mobile">
-          <button class="lang-option" data-lang="fr">FR</button>
-          <button class="lang-option" data-lang="en">EN</button>
-          <button class="lang-option" data-lang="ar">AR</button>
+        <a href="products.html" class="active" data-i18n="nav.products">Produits</a>
+        <button class="theme-toggle" aria-label="Basculer le thème">
+          <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button class="lang-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false">
+            <span id="lang-current">FR</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="lang-dropdown" id="lang-dropdown" role="listbox">
+            <button class="lang-option" data-lang="fr" role="option">FR — Français</button>
+            <button class="lang-option" data-lang="en" role="option">EN — English</button>
+            <button class="lang-option" data-lang="ar" role="option">AR — عربية</button>
+          </div>
         </div>
+        <a href="index.html#contact" class="btn btn--primary navbar__cta" style="padding:0.6rem 1.25rem" data-i18n="nav.contact">Nous Contacter</a>
+      </div>
+      <div class="navbar__actions">
+        <button class="theme-toggle" aria-label="Basculer le thème">
+          <svg class="theme-toggle__moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="theme-toggle__sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
-  </nav>
+  </div>
+  <div class="navbar__mobile" id="mobile-menu">
+    <div class="navbar__mobile-inner">
+      <a href="index.html"         onclick="closeMobileMenu()" data-i18n="nav.home">Accueil</a>
+      <a href="about.html"         onclick="closeMobileMenu()" data-i18n="nav.about">À Propos</a>
+      <a href="products.html"      onclick="closeMobileMenu()" data-i18n="nav.products">Produits</a>
+      <a href="index.html#contact" onclick="closeMobileMenu()" class="btn btn--primary" style="width:fit-content" data-i18n="nav.contact">Nous Contacter</a>
+      <div class="lang-switcher-mobile">
+        <button class="lang-option" data-lang="fr">FR</button>
+        <button class="lang-option" data-lang="en">EN</button>
+        <button class="lang-option" data-lang="ar">AR</button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-  <main id="app-main">
-    <!-- Filled dynamically by application-page.js -->
-  </main>
 
-  <!-- ── Footer ─────────────────────────────────────────────── -->
-  <footer>
-    <div class="footer__banner-wrap">
-      <div class="container">
-        <div class="footer__banner">
-          <div>
-            <h3 class="footer__banner-title" data-i18n="footer.banner.title">Prêt à développer votre prochain produit ?</h3>
-            <p class="footer__banner-sub" data-i18n="footer.banner.sub">Collaborons pour créer la solution lipidique idéale.</p>
-          </div>
-          <a href="index.html#contact" class="btn btn--light" data-i18n="footer.banner.btn">Nous Contacter</a>
-        </div>
-      </div>
+<!-- ════════════════════════════════════════════════
+     PAGE HEADER
+════════════════════════════════════════════════ -->
+<section class="products-page-hero">
+  <div class="products__bg-blobs">
+    <div class="products__blob products__blob--1"></div>
+    <div class="products__blob products__blob--2"></div>
+    <div class="products__blob products__blob--3"></div>
+  </div>
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb reveal" aria-label="Fil d'Ariane">
+      <a href="index.html" data-i18n="nav.home">Accueil</a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      <a href="products.html" data-i18n="app.breadcrumb.products">Produits</a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      <span id="breadcrumb-app">—</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="products__header reveal">
+      <span class="badge badge--dark"><span class="badge-dot"></span><span data-i18n="app.badge">Application</span></span>
+      <h1 class="products__title">
+        <span class="products__title-gradient" id="app-page-title">—</span>
+      </h1>
+      <p class="products__sub" id="app-page-sub" data-i18n="app.page.sub">
+        Découvrez les avantages et les produits Baltimar pour cette application.
+      </p>
     </div>
-    <div class="footer__main">
-      <div class="container">
-        <div class="footer__grid">
-          <div>
-            <a href="index.html" class="footer__logo" aria-label="Baltimar"><img src="../images/logo3.jpg" alt="Baltimar" /></a>
-            <p class="footer__about" data-i18n="footer.about">Fabricant marocain d'huiles et graisses végétales.</p>
-            <div class="footer__socials">
-              <a href="#" class="footer__social" aria-label="Site web"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg></a>
-              <a href="#" class="footer__social" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
-            </div>
-          </div>
-          <div>
-            <h4 class="footer__col-title" data-i18n="footer.nav">Navigation</h4>
-            <ul class="footer__col-list">
-              <li><a href="index.html" data-i18n="nav.home">Accueil</a></li>
-              <li><a href="about.html" data-i18n="nav.about">À Propos</a></li>
-              <li><a href="products.html" data-i18n="nav.products">Produits</a></li>
-              <li><a href="index.html#contact" data-i18n="footer.contact">Contact</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="footer__col-title" data-i18n="footer.apps">Applications</h4>
-            <ul class="footer__col-list">
-              <li><a href="application.html?key=boulangerie" data-i18n="footer.app.boul">Boulangerie</a></li>
-              <li><a href="application.html?key=confiserie" data-i18n="footer.app.conf">Confiserie / Biscuiterie</a></li>
-              <li><a href="application.html?key=laitier" data-i18n="footer.app.lait">Alternatives Laitières</a></li>
-              <li><a href="application.html?key=friture" data-i18n="footer.app.frit">Friture</a></li>
-              <li><a href="application.html?key=conserveries" data-i18n="footer.app.cons">Conserveries</a></li>
-              <li><a href="application.html?key=nonalimentaire" data-i18n="footer.app.noal">Non Alimentaires</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="footer__col-title" data-i18n="footer.contact">Contact</h4>
-            <ul class="footer__contact-list">
-              <li class="footer__contact-item">
-                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg></div>
-                <span class="footer__contact-text">Z.I Sahel-Had Soualem (Route Casa El Jadida) B.P 99 — Morocco</span>
-              </li>
-              <li class="footer__contact-item">
-                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg></div>
-                <span class="footer__contact-text">+212 5XX XX XX XX</span>
-              </li>
-              <li class="footer__contact-item">
-                <div class="footer__contact-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg></div>
-                <span class="footer__contact-text">contact@baltimar.ma</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+
+    <!-- Retour -->
+    <div class="reveal reveal-delay-1" style="margin-top:1.5rem">
+      <a href="products.html" class="btn btn--outline" style="width:fit-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        <span data-i18n="app.back">Retour aux applications</span>
+      </a>
     </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     IMAGE + AVANTAGES
+════════════════════════════════════════════════ -->
+<section style="padding:5rem 0; background:#fff; position:relative;">
+  <div class="container">
+    <div class="app-detail__layout reveal">
+
+      <!-- Image -->
+      <div class="app-detail__visual">
+        <img id="app-detail-img" src="" alt="" class="app-detail__img" />
+      </div>
+
+      <!-- Avantages -->
+      <div class="app-detail__content">
+        <span class="badge badge--dark" style="margin-bottom:1.25rem"><span class="badge-dot"></span><span data-i18n="app.adv.badge">Avantages</span></span>
+        <h2 class="app-detail__section-title">
+          Pourquoi choisir Baltimar pour
+          <span class="products__title-gradient" id="app-detail-title-inline">cette application</span>&nbsp;?
+        </h2>
+        <ul class="app-detail__benefits" id="app-detail-list"></ul>
+        <a href="index.html#contact" class="btn btn--primary" style="margin-top:2rem; display:inline-flex; align-items:center; gap:0.5rem">
+          <span data-i18n="app.contact.btn">Demander un devis</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     PRODUITS ASSOCIÉS
+════════════════════════════════════════════════ -->
+<section style="padding:5rem 0 6rem; background:oklch(97% 0.01 160); position:relative;">
+  <div class="container">
+
+    <div class="reveal">
+      <span class="badge badge--dark" style="margin-bottom:1.25rem"><span class="badge-dot"></span><span data-i18n="app.range.badge">Gamme dédiée</span></span>
+      <h2 class="app-detail__section-title" style="margin-bottom:0.75rem">
+        Produits associés à
+        <span class="products__title-gradient" id="app-products-title-inline">cette application</span>
+      </h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:2.5rem" data-i18n="app.range.sub">
+        Sélectionnés parmi notre gamme complète pour répondre aux exigences de cette application.
+      </p>
+    </div>
+
+    <!-- Products grid -->
+    <div class="app-products-grid" id="app-products-grid"></div>
+
+    <!-- Empty state -->
+    <div class="app-products-empty" id="app-products-empty" style="display:none">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <p data-i18n="app.empty">Aucun produit spécifique listé pour cette application.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer__banner-wrap">
     <div class="container">
-      <div class="footer__bottom">
-        <p class="footer__copy" data-i18n="footer.copy">© 2026 Baltimar. Tous droits réservés.</p>
-        <div class="footer__legal">
-          <a href="#" data-i18n="footer.privacy">Politique de confidentialité</a>
-          <a href="#" data-i18n="footer.legal">Mentions légales</a>
+      <div class="footer__banner">
+        <div>
+          <h3 class="footer__banner-title" data-i18n="footer.banner.title">Prêt à développer votre prochain produit ?</h3>
+          <p class="footer__banner-sub" data-i18n="footer.banner.sub">Collaborons pour créer la solution lipidique idéale pour votre application.</p>
         </div>
+        <a href="index.html#contact" class="btn btn--light" data-i18n="footer.banner.btn">Nous Contacter</a>
       </div>
     </div>
-  </footer>
+  </div>
 
-  <script src="js/data.js"></script>
-  <script src="js/i18n.js"></script>
-  <script src="js/scroll-reveal.js"></script>
-  <script src="js/navbar.js"></script>
-  <script src="js/application-page.js"></script>
+  <div class="footer__main">
+    <div class="container">
+      <div class="footer__grid">
+
+        <div>
+          <a href="index.html" class="footer__logo" aria-label="Baltimar">
+            <img src="images/logo3.jpg" alt="Baltimar" />
+          </a>
+          <p class="footer__about" data-i18n="footer.about">
+            Fabricant marocain d'huiles et graisses végétales de haute qualité
+            au service de l'industrie agroalimentaire depuis 1980.
+          </p>
+          <div class="footer__socials">
+            <a href="#" class="footer__social" aria-label="Site web">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </a>
+            <a href="#" class="footer__social" aria-label="Réseaux sociaux">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__col-title" data-i18n="footer.nav">Navigation</h4>
+          <ul class="footer__col-list">
+            <li><a href="index.html" data-i18n="nav.home">Accueil</a></li>
+            <li><a href="about.html" data-i18n="nav.about">À Propos</a></li>
+            <li><a href="products.html" data-i18n="nav.products">Produits</a></li>
+            <li><a href="index.html#contact" data-i18n="footer.contact">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer__col-title" data-i18n="footer.apps">Applications</h4>
+          <ul class="footer__col-list">
+            <li><a href="application.html?key=boulangerie" data-i18n="footer.app.boul">Boulangerie</a></li>
+            <li><a href="application.html?key=confiserie" data-i18n="footer.app.conf">Confiserie / Biscuiterie</a></li>
+            <li><a href="application.html?key=laitier" data-i18n="footer.app.lait">Alternatives Laitières</a></li>
+            <li><a href="application.html?key=friture" data-i18n="footer.app.frit">Friture</a></li>
+            <li><a href="application.html?key=conserveries" data-i18n="footer.app.cons">Conserveries</a></li>
+            <li><a href="application.html?key=nonalimentaire" data-i18n="footer.app.noal">Non Alimentaires</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer__col-title" data-i18n="footer.contact">Contact</h4>
+          <ul class="footer__contact-list">
+            <li class="footer__contact-item">
+              <div class="footer__contact-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <span class="footer__contact-text">Z.I Sahel-Had Soualem (Route Casa El jadida) B.P 99 — Morocco</span>
+            </li>
+            <li class="footer__contact-item">
+              <div class="footer__contact-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              </div>
+              <span class="footer__contact-text">+212 5XX XX XX XX</span>
+            </li>
+            <li class="footer__contact-item">
+              <div class="footer__contact-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <span class="footer__contact-text">contact@baltimar.ma</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="footer__bottom">
+      <p class="footer__copy" data-i18n="footer.copy">© 2026 Baltimar. Tous droits réservés.</p>
+      <div class="footer__legal">
+        <a href="#" data-i18n="footer.privacy">Politique de confidentialité</a>
+        <a href="#" data-i18n="footer.legal">Mentions légales</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="application.js"></script>
 </body>
 </html>

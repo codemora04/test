@@ -1,16 +1,21 @@
 /* ============================================================
-   BALTIMAR — theme.js
-   Dark / light mode toggle
+   BALTIMAR — theme.js  (dark-mode toggle, runs on every page)
    ============================================================ */
-
-/* Apply saved theme immediately (before DOMContentLoaded) to avoid flash */
 ;(function () {
-  if (localStorage.getItem('baltimar-theme') === 'dark') {
-    document.documentElement.classList.add('dark')
-  }
-})()
+  const html   = document.documentElement
+  const THEME_KEY = 'baltimar-theme'
 
-function toggleTheme() {
-  const isDark = document.documentElement.classList.toggle('dark')
-  localStorage.setItem('baltimar-theme', isDark ? 'dark' : 'light')
-}
+  /* ── Restore preference before first paint ──────────────── */
+  const saved = localStorage.getItem(THEME_KEY)
+  if (saved === 'dark') html.classList.add('dark')
+
+  /* ── Wire toggle button once DOM is ready ───────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        html.classList.toggle('dark')
+        localStorage.setItem(THEME_KEY, html.classList.contains('dark') ? 'dark' : 'light')
+      })
+    })
+  })
+})()
